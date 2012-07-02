@@ -3,10 +3,10 @@ require 'stringio'
 
 describe "AvSummary" do
 
-  context "#parse_config" do
+  context "#parse_config_block" do
     context "given a DSL block 'version'" do
       it "returns 'v1.0" do
-        o = AvSummary.new.parse_config do
+        o = AvSummary.new.parse_config_block do
           version
         end
         o.should == "v1.0"
