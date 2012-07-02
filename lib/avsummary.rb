@@ -1,3 +1,6 @@
+#!/bin/env ruby
+
+require 'thor'
 require 'pp'
 
 module AvSummary
@@ -38,22 +41,36 @@ module AvSummary
       arg ? @end_col = arg : @end_col
     end
    end
+
+  class Config
+    
+  end
+
+  class Apprication < Thor
+    desc 'load', "load 'avconfig'"
+    def load
+      
+    end
+  end
+
 end
 
-def source(&block)
-  @source = AvSummary::Source.new
-  @source.instance_eval(&block)
-end
+include AvSummary
 
-def table(title, &block)
-  tab = AvSummary::Table.new(title)
-  tab.instance_eval(&block)
-  @tables ||= Array.new
-  @tables << tab
-end
+# def source(&block)
+#   @source = Source.new
+#   @source.instance_eval(&block)
+# end
+
+# def table(title, &block)
+#   tab = Table.new(title)
+#   tab.instance_eval(&block)
+#   @tables ||= Array.new
+#   @tables << tab
+# end
 
 if __FILE__ == $0 
   load './avconfig'
-  pp @tables
+  Apprication.start
 end
 
