@@ -1,16 +1,36 @@
 #!/bin/env ruby
 
 require 'thor'
+require 'kyotocabinet'
 require 'pp'
+
+AVCONFIG = "avconfig"
+AVSCRIPT = "run-annotate-variartion.sh"
 
 module AvSummary
   class Source
-    def snv(arg=nil)
-      arg ? @snv = arg : @snv
+    def snv_vcf(arg=nil)
+      arg ? @snv_vcf = arg : @snv
     end
 
-    def indel(arg=nil)
-      arg ? @indel = arg : @indel
+    def snv_av(arg=nil)
+      arg ? @snv_av = arg : @snv
+    end
+
+    def indel_vcf(arg=nil)
+      arg ? @indel_vcf = arg : @indel
+    end
+
+    def indel_av(arg=nil)
+      arg ? @indel_av = arg : @indel
+    end
+
+    def annotate_variation(arg=nil)
+      arg ? @annotate_variation = arg : @annotate_variation 
+    end
+
+    def database_dir(arg=nil)
+      arg ? @database_dir = arg : @database_dir
     end
   end
 
@@ -19,6 +39,14 @@ module AvSummary
 
     def initialize(arg)
       @title = arg
+    end
+
+    def type(*arg)
+      if arg.empty?
+        @type
+      else
+        @type = arg
+      end
     end
 
     def mode(arg=nil)
@@ -40,37 +68,84 @@ module AvSummary
     def end_col(arg=nil)
       arg ? @end_col = arg : @end_col
     end
-   end
+  end
 
   class Config
+    attr_reader :tables
+
+     def source(&block)
+      if block_given?
+        @source = Source.new
+        @source.instance_eval(&block)
+        self
+      else
+        @source
+      end
+    end
     
+    def table(title, &block)
+      tab = Table.new(title)
+      tab.instance_eval(&block)
+      @tables ||= Array.new
+      @tables << tab
+      self
+    end    
   end
 
   class Apprication < Thor
-    desc 'load', "load 'avconfig'"
-    def load
-      
+    desc 'annotate', 'generate a annotate_variation script'
+    def annotate
+      open(AVSCRIPT, 'w') do |fout|
+        fout.puts "#!/bin/sh"
+        fout.puts "cmd=\"#{config.source.annotate_variation}\""
+        fout.puts "db=\"#{config.source.database_dir}\""
+        fout.puts "# SNV"
+        config.tables.each_with_index do |tab|
+          if tab.type.include? :snv
+            fout.puts ["${cmd}",
+                       "--outfile #{tab.title}",
+                       "--#{tab.mode}",
+                       "#{tab.avopt}",
+                       "#{config.source.snv_av}",
+                       "${db}",
+                      ].join(" ")
+          end
+        end
+        fout.puts "# INDEL"
+        config.tables.each do |tab|
+          if tab.type.include? :indel
+            fout.puts ["${cmd}",
+                       "--outfile #{tab.title}",
+                       "--#{tab.mode}",
+                       "#{tab.avopt}",
+                       "#{config.source.indel_av}",
+                       "${db}",
+                      ].join(" ")
+          end
+        end
+      end
     end
-  end
+
+    desc 'integrate', 'integrate multiple annotate-variation results'
+    # def intgrate
+
+    #   #
+    # end
+
+    private 
+
+    def config
+      @config ||= 
+        Config.new.instance_eval(File.read("#{File.dirname(__FILE__)}/#{AVCONFIG}"))
+    end
+
+  #   def load_filter(file)
+      
+  #   end
+  # end
 
 end
-
-include AvSummary
-
-# def source(&block)
-#   @source = Source.new
-#   @source.instance_eval(&block)
-# end
-
-# def table(title, &block)
-#   tab = Table.new(title)
-#   tab.instance_eval(&block)
-#   @tables ||= Array.new
-#   @tables << tab
-# end
 
 if __FILE__ == $0 
-  load './avconfig'
-  Apprication.start
+  AvSummary::Apprication.start
 end
-
