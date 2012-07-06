@@ -4,8 +4,8 @@ require 'stringio'
 describe "AvSummary" do
   describe "Apprication" do
 
-    context "#" do
-      context "" do
+    context "#load_filter" do
+      context "given " do
         it "return" do
           o = AvSummary.new.parse_config_file(StringIO.new('version'))
           o.dsl.should == "v1.0"

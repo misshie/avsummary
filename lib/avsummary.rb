@@ -4,10 +4,14 @@ require 'thor'
 require 'kyotocabinet'
 require 'pp'
 
-AVCONFIG = "avconfig"
-AVSCRIPT = "run-annotate-variartion.sh"
 
 module AvSummary
+  AVCONFIG = "avconfig"
+  AVSCRIPT = "run-annotate-variartion.sh"
+  VCF_ORDER =
+    %w(M 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y) \
+    .map{|e|"chr#{e}"}
+
   class Source
     def snv_vcf(arg=nil)
       arg ? @snv_vcf = arg : @snv
@@ -93,8 +97,12 @@ module AvSummary
   end
 
   class Apprication < Thor
+    include AvSummary
+
     desc 'annotate', 'generate a annotate_variation script'
     def annotate
+
+
       open(AVSCRIPT, 'w') do |fout|
         fout.puts "#!/bin/sh"
         fout.puts "cmd=\"#{config.source.annotate_variation}\""
@@ -127,10 +135,12 @@ module AvSummary
     end
 
     desc 'integrate', 'integrate multiple annotate-variation results'
-    # def intgrate
-
-    #   #
-    # end
+    def intgrate
+      load_vcf
+      load_tables
+      integrate_tables
+      generate_awk_template
+    end
 
     private 
 
@@ -142,7 +152,7 @@ module AvSummary
   #   def load_filter(file)
       
   #   end
-  # end
+  end
 
 end
 
