@@ -101,8 +101,6 @@ module AvSummary
 
     desc 'annotate', 'generate a annotate_variation script'
     def annotate
-
-
       open(AVSCRIPT, 'w') do |fout|
         fout.puts "#!/bin/sh"
         fout.puts "cmd=\"#{config.source.annotate_variation}\""
@@ -149,9 +147,13 @@ module AvSummary
         Config.new.instance_eval(File.read("#{File.dirname(__FILE__)}/#{AVCONFIG}"))
     end
 
-  #   def load_filter(file)
+    def load_vcf
+      $stderr.puts "[avsummary integrate] start loading a vcf file"
+      snv_vcf   = KyotoCabinet::DB.new.open("*") # on-memory hash DB
+      indel_vcf = KyotoCabinet::DB.new.open("*") # on-memory hash DB
       
-  #   end
+      config.source.snv_vcf
+    end
   end
 
 end
