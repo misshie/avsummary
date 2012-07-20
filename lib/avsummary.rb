@@ -22,7 +22,7 @@ module AvSummary
     member :qual, String
     member :filter, String
     member :info, String
-    member :format, String
+    member :gt_format, String
     member :genotypes, Array
   end
 
@@ -164,7 +164,7 @@ module AvSummary
     def parse_vcf_row(row)
       vcfrow = VcfRow.new
       row.chomp!
-      next if row.start_with? "#"
+      return nil if row.start_with? "#"
       cols = row.split("\t")
       vcfrow = VcfRow.new
       vcfrow.chrom = cols[0]
@@ -175,7 +175,7 @@ module AvSummary
       vcfrow.qual = Float(cols[5])
       vcfrow.filter = cols[6]
       vcfrow.info = cols[7]
-      vcfrow.format = cols[8]
+      vcfrow.gt_format = cols[8]
       vcfrow.genotypes = cols[9..-1]
       vcfrow   
     end
