@@ -2,6 +2,7 @@
 
 require 'thor'
 require 'kyotocabinet'
+require 'striuct'
 require 'pp'
 
 
@@ -11,6 +12,19 @@ module AvSummary
   VCF_ORDER =
     %w(M 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y) \
     .map{|e|"chr#{e}"}
+
+  VcfRow = Striuct.define do
+    member :chrom, String
+    member :pos, String
+    member :id, String
+    member :ref, String
+    member :alt, String
+    member :qual, String
+    member :filter, String
+    member :info, String
+    member :format, String
+    member :genotypes, Array
+  end
 
   class Source
     def snv_vcf(arg=nil)
@@ -147,12 +161,42 @@ module AvSummary
         Config.new.instance_eval(File.read("#{File.dirname(__FILE__)}/#{AVCONFIG}"))
     end
 
+    def parse_vcf_row(row)
+      vcfrow = VcfRow.new
+      row.chomp!
+      next if row.start_with? "#"
+      cols = row.split("\t")
+      vcfrow = VcfRow.new
+      vcfrow.chrom = cols[0]
+      vcfrow.pos = Integer(cols[1])
+      vcfrow.id = cols[2]
+      vcfrow.ref = cols[3]
+      vcfrow.alt = cols[4]
+      vcfrow.qual = Float(cols[5])
+      vcfrow.filter = cols[6]
+      vcfrow.info = cols[7]
+      vcfrow.format = cols[8]
+      vcfrow.genotypes = cols[9..-1]
+      vcfrow   
+    end
+
     def load_vcf
       $stderr.puts "[avsummary integrate] start loading a vcf file"
-      snv_vcf   = KyotoCabinet::DB.new.open("*") # on-memory hash DB
-      indel_vcf = KyotoCabinet::DB.new.open("*") # on-memory hash DB
+      snv_db   = KyotoCabinet::DB.new.open("*") # on-memory hash DB
+      indel_db = KyotoCabinet::DB.new.open("*") # on-memory hash DB
       
-      config.source.snv_vcf
+      open(config.source.snv_vcf) do |fin|
+        fin.each_line do |row|
+          row.chomp!
+          vcfcol = parse_vcf_row(row)
+          key = "#{vcfcol.chrom}:#{vcfcol.pos}"
+          if snv_db[key]
+            snv_db[key] = "#{snv_db[key]}\n#{row}"
+          else
+            snv_db[key] = row
+          end          
+        end
+      end
     end
   end
 
