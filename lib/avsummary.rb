@@ -28,19 +28,21 @@ module AvSummary
 
   class Source
     def snv_vcf(arg=nil)
-      arg ? @snv_vcf = arg : @snv
+      @q
+
+      arg ? @snv_vcf = arg : @snv_vcf
     end
 
     def snv_av(arg=nil)
-      arg ? @snv_av = arg : @snv
+      arg ? @snv_av = arg : @snv_av
     end
 
     def indel_vcf(arg=nil)
-      arg ? @indel_vcf = arg : @indel
+      arg ? @indel_vcf = arg : @indel_vcf
     end
 
     def indel_av(arg=nil)
-      arg ? @indel_av = arg : @indel
+      arg ? @indel_av = arg : @indel_av
     end
 
     def annotate_variation(arg=nil)
@@ -49,6 +51,14 @@ module AvSummary
 
     def database_dir(arg=nil)
       arg ? @database_dir = arg : @database_dir
+    end
+
+    def snv_dir(arg=nil)
+      arg ? @snv_dir = arg : (@snv_dir ||= "SNV")
+    end
+
+    def indel_dir(arg=nil)
+      arg ? @indel_dir = arg : (@indel_dir ||= "INDEL")
     end
   end
 
@@ -151,14 +161,22 @@ module AvSummary
       load_vcf
       load_tables
       integrate_tables
-      generate_awk_template
+      generate_awk_templateq
     end
 
     private 
 
     def config
-      @config ||= 
-        Config.new.instance_eval(File.read("#{File.dirname(__FILE__)}/#{AVCONFIG}"))
+      unless @config
+        if File.exist? "./#{AVCONFIG}"
+          @config = 
+            Config.new.instance_eval(File.read("./#{AVCONFIG}"))
+        else
+          @config = 
+            Config.new.instance_eval(File.read("#{File.dirname(__FILE__)}/#{AVCONFIG}"))
+        end
+      end
+      @config
     end
 
     def parse_vcf_row(row)
