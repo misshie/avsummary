@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "avsummary"
   gem.homepage = "http://github.com/misshie/avsummary"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{ANNOVAR helper tool}
+  gem.description = %Q{summarize ANNOVAR output information}
   gem.email = "hmishima@nagasaki-u.ac.jp"
   gem.authors = ["Hiroyuki Mishima"]
   # dependencies defined in Gemfile

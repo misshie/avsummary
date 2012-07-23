@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 cmd="/opt/annovar/annotate_variation.pl"
 db="/opt/annovar-humandb"
 # SNV
-${cmd} --outfile CytoBand --regionanno --refver hg19 --dbtype cytoband snv500.av ${db}
+mkdir -p SNV
+${cmd} --outfile SNV/CytoBand --regionanno --buildver hg19 --dbtype cytoband snv500.av ${db} 2> SNV/CytoBand.log
 # INDEL
-${cmd} --outfile CytoBand --regionanno --refver hg19 --dbtype cytoband indel500.av ${db}
+mkdir -p INDEL
+${cmd} --outfile INDEL/CytoBand --regionanno --buildver hg19 --dbtype cytoband indel500.av ${db} 2> SNV/CytoBand.log
