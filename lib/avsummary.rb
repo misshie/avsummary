@@ -193,18 +193,19 @@ module AvSummary
         vcf_dbs[:snv].open("*")
         vcf_dbs[:indel] = KyotoCabinet::DB.new
         vcf_dbs[:indel].open("*")
+        store_vcfs(vcf_dbs)
         
-        tab_dbs = Array.new
-        config.tables.each do |table|
-          tab_db = KyotoCabinet:DB.new
-          tab_db.open("*")
-          #
-          tab_dbs << tab_db          
-        end
-        integrate(vcf_dbs, tab_dbs)
+        # tab_dbs = Array.new
+        # config.tables.each do |table|
+        #   tab_db = KyotoCabinet:DB.new
+        #   tab_db.open("*")
+        #   store_table(tab_db)
+        #   tab_dbs << tab_db          
+        # end
+        # integrate(vcf_dbs, tab_dbs)
       ensure
-        vcf_dbs.each{|db|db.close}
-        tab_dbs.each{|db|db.close}
+        vcf_dbs.each{|k,v|v.close}
+        #tab_dbs.each{|db|db.close}
       end      
     end   
     
@@ -222,7 +223,7 @@ module AvSummary
       end
       @config
     end
-
+ 
     def parse_vcf_row(row)
       vcfrow = VcfRow.new
       row.chomp!
@@ -242,30 +243,33 @@ module AvSummary
       vcfrow   
     end
 
-    def kc_store(snv_db, indel_db)
-      $stderr.puts "[avsummary integrate] loading a vcf file"
-      [config.source.snv_vcf, config.source.indel_vcf].each do |vcf|
-        open(vcf) do |fin|
+    def store_vcfs(vcf_dbs)
+      $stderr.puts "[avsummary integrate] loading a vcf file" 
+      [ { :vcf => config.source.snv_vcf,
+          :db  => vcf_dbs[:snv]},
+        { :vcf => config.source.indel_vcf,
+          :db  => vcf_dbs[:indel]} ].each do |vcfdb|
+        open(vcfdb[:vcf]) do |fin|
           fin.each_line do |row|
             row.chomp!
             next if row.start_with? "#"
             vcfcol = parse_vcf_row(row)
             key = "#{vcfcol.chrom}:#{vcfcol.pos}"
-            if snv_db[key]
-              snv_db[key] = "#{snv_db[key]}\n#{row}"
+            if vcfdb[:db][key]
+              vcfdb[:db][key] = "#{vcfdb[:db][key]}\n#{row}"
             else
-              snv_db[key] = row
+              vcfdb[:db][key] = row
             end          
           end # fin.each_line
         end # open
       end # each
     end # def kc_store
 
-    def load_tables(snv_db, indel_db)
+    def table_store(tab_db) # SINGLE DB!!!
       # $stderr.puts "[avsummary integrate] loading table"
       # config.tables.each do |table|
       #   load_table(snv_db, indel_db)
-      end
+      # end
     end
       
     def load_table(snv_db, indel_db)
