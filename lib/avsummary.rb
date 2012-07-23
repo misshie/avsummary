@@ -188,6 +188,7 @@ module AvSummary
     desc 'integrate', 'integrate multiple annotate-variation results'
     def integrate
       begin
+        $stderr.puts "[avsummary integrate] loading a vcf file" 
         vcf_dbs = Hash.new
         vcf_dbs[:snv] = KyotoCabinet::DB.new
         vcf_dbs[:snv].open("*")
@@ -195,18 +196,19 @@ module AvSummary
         vcf_dbs[:indel].open("*")
         store_vcfs(vcf_dbs)
   
+        $stderr.puts "[avsummary integrate] loading annotation(s)"
         annot_dbs = Array.new
-        config.tables.each do |table|
+        config.tables.each do |annot|
           annot_db = KyotoCabinet::DB.new
           annot_db.open("*")
-          #store_annot(annot_db)
+          store_annot(annot_db)
           annot_dbs << annot_db          
         end
         # integrate(vcf_dbs, annot_dbs)
       ensure
         vcf_dbs.each{|k,v|v.close}
         annot_dbs.each{|db|db.close}
-      end      
+      end
     end   
     
     private 
@@ -244,7 +246,6 @@ module AvSummary
     end
 
     def store_vcfs(vcf_dbs)
-      $stderr.puts "[avsummary integrate] loading a vcf file" 
       [ { :vcf => config.source.snv_vcf,
           :db  => vcf_dbs[:snv]},
         { :vcf => config.source.indel_vcf,
@@ -265,8 +266,7 @@ module AvSummary
       end # each
     end # def kc_store
 
-    def store_annot(annot_db) # SINGLE DB!!!
-      # $stderr.puts "[avsummary integrate] loading table"
+    def store_annot(annot_db)
       # config.tables.each do |table|
       #   load_table(snv_db, indel_db)
       # end
