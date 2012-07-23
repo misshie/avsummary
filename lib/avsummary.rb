@@ -194,18 +194,18 @@ module AvSummary
         vcf_dbs[:indel] = KyotoCabinet::DB.new
         vcf_dbs[:indel].open("*")
         store_vcfs(vcf_dbs)
-        
-        # tab_dbs = Array.new
-        # config.tables.each do |table|
-        #   tab_db = KyotoCabinet:DB.new
-        #   tab_db.open("*")
-        #   store_table(tab_db)
-        #   tab_dbs << tab_db          
-        # end
+  
+        tab_dbs = Array.new
+        config.tables.each do |table|
+          tab_db = KyotoCabinet::DB.new
+          tab_db.open("*")
+          #store_table(tab_db)
+          tab_dbs << tab_db          
+        end
         # integrate(vcf_dbs, tab_dbs)
       ensure
         vcf_dbs.each{|k,v|v.close}
-        #tab_dbs.each{|db|db.close}
+        tab_dbs.each{|db|db.close}
       end      
     end   
     
