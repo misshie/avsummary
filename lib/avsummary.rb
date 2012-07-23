@@ -197,21 +197,29 @@ module AvSummary
         store_vcfs(vcf_dbs)
   
         $stderr.puts "[avsummary integrate] loading annotation(s)"
-        annot_dbs = Array.new
-        config.annotations.each do |annot|
-          annot_db = KyotoCabinet::DB.new
-          annot_db.open("*")
-          store_annot(annot_db)
-          annot_dbs << annot_db          
-        end
+        # annot_dbs = Array.new
+        # config.annotations.each do |annot|
+        #   annot_db = KyotoCabinet::DB.new
+        #   annot_db.open("*")
+        #   store_annot(annot, annot_db)
+        #   annot_dbs << annot_db          
+        # end
         # integrate(vcf_dbs, annot_dbs)
       ensure
         vcf_dbs.each{|k,v|v.close}
-        annot_dbs.each{|db|db.close}
+        #annot_dbs.each{|db|db.close}
       end
     end   
     
     private 
+
+    attr_accessor :vcf_dbs
+    attr_accessor :annot_dbs
+
+    #def vcf_dbs=(x);   @vcf_dbs = x;   end
+    #def vcf_dbs    ;   @vcf_dbs;       end
+    #def annot_dbs=(x); @annot_dbs = x; end
+    #def annot_dbs;     @annoy_dbs;     end
 
     def config
       unless @config
@@ -266,10 +274,13 @@ module AvSummary
       end # each
     end # def kc_store
 
-    def store_annot(annot_db)
-      # config.tables.each do |table|
+    def store_annot(annot, annot_db)
+      
+
+
+
       #   load_table(snv_db, indel_db)
-      # end
+      
     end
       
     def load_table(snv_db, indel_db)
