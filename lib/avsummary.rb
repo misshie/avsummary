@@ -195,17 +195,17 @@ module AvSummary
         vcf_dbs[:indel].open("*")
         store_vcfs(vcf_dbs)
   
-        tab_dbs = Array.new
+        annot_dbs = Array.new
         config.tables.each do |table|
-          tab_db = KyotoCabinet::DB.new
-          tab_db.open("*")
-          #store_table(tab_db)
-          tab_dbs << tab_db          
+          annot_db = KyotoCabinet::DB.new
+          annot_db.open("*")
+          #store_annot(annot_db)
+          annot_dbs << annot_db          
         end
-        # integrate(vcf_dbs, tab_dbs)
+        # integrate(vcf_dbs, annot_dbs)
       ensure
         vcf_dbs.each{|k,v|v.close}
-        tab_dbs.each{|db|db.close}
+        annot_dbs.each{|db|db.close}
       end      
     end   
     
@@ -265,7 +265,7 @@ module AvSummary
       end # each
     end # def kc_store
 
-    def table_store(tab_db) # SINGLE DB!!!
+    def store_annot(annot_db) # SINGLE DB!!!
       # $stderr.puts "[avsummary integrate] loading table"
       # config.tables.each do |table|
       #   load_table(snv_db, indel_db)
