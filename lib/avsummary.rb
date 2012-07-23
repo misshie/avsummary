@@ -66,7 +66,7 @@ module AvSummary
     end
   end
 
-  class Table
+  class Annotation
     attr_reader :title
 
     def initialize(arg)
@@ -103,7 +103,7 @@ module AvSummary
   end
 
   class Config
-    attr_reader :tables
+    attr_reader :annotations
 
      def source(&block)
       if block_given?
@@ -115,11 +115,11 @@ module AvSummary
       end
     end
     
-    def table(title, &block)
-      tab = Table.new(title)
-      tab.instance_eval(&block)
-      @tables ||= Array.new
-      @tables << tab
+    def annotation(title, &block)
+      annot = Annotation.new(title)
+      annot.instance_eval(&block)
+      @annotations ||= Array.new
+      @annotations << annot
       self
     end    
   end
@@ -198,7 +198,7 @@ module AvSummary
   
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         annot_dbs = Array.new
-        config.tables.each do |annot|
+        config.annotations.each do |annot|
           annot_db = KyotoCabinet::DB.new
           annot_db.open("*")
           store_annot(annot_db)

@@ -12,13 +12,13 @@ source do
   database_dir "/opt/annovar-humandb"
 end
 
-table "CytoBand" do
+annotation "CytoBand" do
   type :snv, :indel
   mode :regionanno
   avopt "--buildver hg19 --dbtype cytoband"
 end
 
-# table "RefGene" do
+# annotation "RefGene" do
 #   type :snv, :indel
 #   mode :geneanno
 #   avopt "--buildver hg19"
@@ -27,7 +27,7 @@ end
 #   end_col 5
 # end
 
-# table "EnsGene" do
+# annotation "EnsGene" do
 #   type :snv, :indel
 #   mode :geneanno
 #   avopt "--buildver hg19"
@@ -36,55 +36,55 @@ end
 #   end_col 3
 # end
 
-# table "miRNA" do
+# annotation "miRNA" do
 #   type :snv, :indel
 #   mode :regionanno
 #   avopt "--buildver hg19 --dbtype mirna"
 # end
 
-# table "miRNAtarget" do
+# annotation "miRNAtarget" do
 #   type :snv, :indel
 #   mode :regionanno
 #   avopt "--buildver hg19 --dbtype mirnatarget"
 # end
 
-# table "SegDup" do
+# annotation "SegDup" do
 #   type :snv, :indel
 #   mode :regionanno
 #   avopt "--buildver hg19 --dbtype segdup"
 # end
 
-# table "DGV" do
+# annotation "DGV" do
 #   type :snv, :indel
 #   mode :regionanno
 #   avopt "--buildver hg19 --dbtype dgv"
 # end
 
-# table "CG69" do
+# annotation "CG69" do
 #   type :snv, :indel
 #   mode :filter
 #   avopt "--buildver hg19 --dbtype generic --genericcdbfile hg19_cg69.txt"
 # end
 
-# table "dbSNP135" do
+# annotation "dbSNP135" do
 #   type :snv, :indel
 #   mode :filter
 #   avopt "--buildver hg19 --dbtype snp135"
 # end
 
-# table "dbSNP135Common" do
+# annotation "dbSNP135Common" do
 #   type :snv, :indel
 #   mode :filter
 #   avopt "--buildver hg19 --dbtype snp135Common"
 # end
 
-# table "ESP5400_all" do
+# annotation "ESP5400_all" do
 #   type :snv, :indel
 #   mode :filter
 #   avopt "--buildver hg19 --dbtype generic --genericcdbfile hg19_esp54_all.txt"
 # end
 
-# table "1000g2012Feb_all" do
+# annotation "1000g2012Feb_all" do
 #   type :snv, :indel
 #   mode :filter
 #   avopt "--buildver hg19 --dbtype 1000g2012feb_all"
