@@ -119,7 +119,11 @@ module AvSummary
       annot = Annotation.new(title)
       annot.instance_eval(&block)
       @annotations ||= Array.new
-      @annotations << annot
+      if @annotations.any?{|x|x.title == annot.title}
+        $stderr.puts "[ERROR] annotations title must be UNIQUE in an avconfig file"
+        raise
+      end
+      @annotations << annot 
       self
     end    
   end
@@ -193,7 +197,9 @@ module AvSummary
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         store_annots
       ensure
+        self.vcf_dbs ||= Hash.new
         vcf_dbs.each_value{|v|v.close}
+        self.annot_dbs ||= Hash.new
         annot_dbs.each_value{|va|va.each_value{|vb|vb.close}}
       end
     end   
@@ -236,7 +242,7 @@ module AvSummary
     end
 
     def store_vcfs
-      self.vcf_dbs = Hash.new
+      self.vcf_dbs ||= Hash.new
       self.vcf_dbs[:snv] = KyotoCabinet::DB.new
       vcf_dbs[:snv].open("*")
       self.vcf_dbs[:indel] = KyotoCabinet::DB.new
@@ -263,7 +269,7 @@ module AvSummary
     end # def kc_store
 
     def store_annots
-      self.annot_dbs = Hash.new
+      self.annot_dbs ||= Hash.new
       config.annotations.each do |annot|
         db = Hash.new
         if annot.type.include? :snv
