@@ -104,8 +104,8 @@ module AvSummary
 
   class Config
     attr_reader :annotations
-
-     def source(&block)
+   
+    def source(&block)
       if block_given?
         @source = Source.new
         @source.instance_eval(&block)
@@ -193,8 +193,8 @@ module AvSummary
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         store_annots
       ensure
-        vcf_dbs.each{|k,v|v.close}
-        annot_dbs.each{|x|x.each{|k,v|v.close}}
+        vcf_dbs.each_value{|v|v.close}
+        annot_dbs.each_value{|va|va.each_value{|vb|vb.close}}
       end
     end   
     
@@ -263,7 +263,7 @@ module AvSummary
     end # def kc_store
 
     def store_annots
-      self.annot_dbs = Array.new
+      self.annot_dbs = Hash.new
       config.annotations.each do |annot|
         db = Hash.new
         if annot.type.include? :snv
@@ -274,14 +274,10 @@ module AvSummary
           db[:indel] = KyotoCabinet::DB.new
           db[:indel].open
         end
-        self.annot_dbs << db          
+        self.annot_dbs[annot.title] = db          
       end
     end
 
-    def load_table(snv_db, indel_db)
-      
-    end
-    
     def integrate_tables(snv_db, indel_db)
       #
     end
