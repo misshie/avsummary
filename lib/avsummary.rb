@@ -194,7 +194,7 @@ module AvSummary
         store_annots
       ensure
         vcf_dbs.each{|k,v|v.close}
-        annot_dbs.each{|db|db.close}
+        annot_dbs.each{|x|x.each{|k,v|v.close}}
       end
     end   
     
@@ -265,8 +265,15 @@ module AvSummary
     def store_annots
       self.annot_dbs = Array.new
       config.annotations.each do |annot|
-        db = KyotoCabinet::DB.new
-        db.open("*")
+        db = Hash.new
+        if annot.type.include? :snv
+          db[:snv] = KyotoCabinet::DB.new
+          db[:snv].open
+        end
+        if annot.type.include? :indel
+          db[:indel] = KyotoCabinet::DB.new
+          db[:indel].open
+        end
         self.annot_dbs << db          
       end
     end
