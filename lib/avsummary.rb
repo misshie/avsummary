@@ -14,6 +14,8 @@ module AvSummary
   VCF_ORDER =
     %w(M 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y) \
     .map{|e|"chr#{e}"}
+  VCF_HEADER =
+    %w(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample).join("\t")
 
   VcfRow = Striuct.define do
     member :chrom, String
@@ -219,7 +221,6 @@ module AvSummary
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         store_annots
         integrate_vcfs_annots
-        ################pp annot_dbs["CytoBand"][:snv].each{|k,v|p k,v}
       ensure
         self.vcf_dbs ||= Hash.new
         vcf_dbs.each_value{|v|v.close}
@@ -351,23 +352,22 @@ module AvSummary
         return config.annotations.
           select{|x|x.type.include?(:snv)}.
           map{|x|x.info_header}.
-          flatten
+          flatten.join("\t")
       when :indel
         return config.annotations.
           select{|x|x.type.include?(:indel)}.
           map{|x|x.info_header}.
-          flatten
+          flatten.join("\t")
       end
     end
 
     def integrate_vcfs_annots
       open(config.source.snv_summary, "w") do |fsnv|
-        #fsnv.puts build_info_header(:snv)
-        p build_info_header(:snv)
+        fsnv.puts "#{VCF_HEADER}\t#{build_info_header(:snv)}"
+        #p vcf_dbs[:snv].keys
       end
       open(config.source.indel_summary, "w") do |findel|
-        #findel.puts build_info_header(:indel)
-        p build_info_header(:indel)
+        findel.puts "#{VCF_HEADER}\t#{build_info_header(:indel)}"
       end
     end
 
