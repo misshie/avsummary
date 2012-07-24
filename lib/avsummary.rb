@@ -345,9 +345,30 @@ module AvSummary
       end
     end
 
+    def build_info_header(type)
+      case type
+      when :snv
+        return config.annotations.
+          select{|x|x.type.include?(:snv)}.
+          map{|x|x.info_header}.
+          flatten
+      when :indel
+        return config.annotations.
+          select{|x|x.type.include?(:indel)}.
+          map{|x|x.info_header}.
+          flatten
+      end
+    end
+
     def integrate_vcfs_annots
-      config.annotations
-      #
+      open(config.source.snv_summary, "w") do |fsnv|
+        #fsnv.puts build_info_header(:snv)
+        p build_info_header(:snv)
+      end
+      open(config.source.indel_summary, "w") do |findel|
+        #findel.puts build_info_header(:indel)
+        p build_info_header(:indel)
+      end
     end
 
     def generate_awk_templates(snv_db, indel_db)
