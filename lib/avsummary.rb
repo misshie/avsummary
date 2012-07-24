@@ -361,10 +361,21 @@ module AvSummary
       end
     end
 
+    def sorted_keys(type)
+      keys = Array.new
+      vcf_dbs[type].each_key{|k|keys << k.first}
+      keys.sort_by do |k|
+        chr, pos = k.split(":")
+        [VCF_ORDER.index(chr), Integer(pos)]
+      end
+    end
+
     def integrate_vcfs_annots
       open(config.source.snv_summary, "w") do |fsnv|
         fsnv.puts "#{VCF_HEADER}\t#{build_info_header(:snv)}"
-        #p vcf_dbs[:snv].keys
+        sorted_keys(:snv).each do |key|
+          fsnv.puts "#{key}\t#{vcf_dbs[:snv][key]}"
+        end
       end
       open(config.source.indel_summary, "w") do |findel|
         findel.puts "#{VCF_HEADER}\t#{build_info_header(:indel)}"
