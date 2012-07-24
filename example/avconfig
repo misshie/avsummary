@@ -4,9 +4,11 @@ source do
   snv_dir "SNV"
   snv_vcf "snv500.vcf"
   snv_av  "snv500.av"
+  snv_summary "summary_snv.txt"
   indel_dir "INDEL"
   indel_vcf "indel500.vcf"
   indel_av "indel500.av"
+  indel_summary "summary_indel.txt"
   convert2annovar "/opt/annovar/convert2annovar.pl"
   annotate_variation "/opt/annovar/annotate_variation.pl"
   database_dir "/opt/annovar-humandb"
@@ -15,7 +17,11 @@ end
 annotation "CytoBand" do
   type :snv, :indel
   mode :regionanno
-  avopt "--buildver hg19 --dbtype cytoband"
+  buildver "hg19"
+  dbtype "cytoband"
+  info_col 1
+  info_header "CytoBand"
+  vcf_col 7
 end
 
 # annotation "RefGene" do

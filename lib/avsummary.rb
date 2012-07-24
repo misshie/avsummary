@@ -57,8 +57,16 @@ module AvSummary
       arg ? @snv_dir = arg : (@snv_dir ||= "SNV")
     end
 
+    def snv_summary(arg=nil)
+      arg ? @snv_summary = arg : (@snv_summary ||= "summary_snv.txt")
+    end
+
     def indel_dir(arg=nil)
       arg ? @indel_dir = arg : (@indel_dir ||= "INDEL")
+    end
+
+    def indel_summary(arg=nil)
+      arg ? @indel_summary = arg : (@indel_summary ||= "indel_snv.txt")
     end
 
     def convert2annovar(arg=nil)
@@ -67,10 +75,10 @@ module AvSummary
   end
 
   class Annotation
-    attr_reader :title
+    attr_reader :name
 
     def initialize(arg)
-      @title = arg
+      @name = arg
     end
 
     def type(*arg)
@@ -85,20 +93,28 @@ module AvSummary
       arg ? @mode = arg : @mode
     end
 
+    def buildver(arg=nil)
+      arg ? @buildver = arg : @buildver
+    end
+
+    def dbtype(arg=nil)
+      arg ? @dbtype = arg : @dbtype
+    end
+
     def avopt(arg=nil)
       arg ? @avopt = arg : @avopt
     end
 
-    def chrom_col(arg=nil)
-      arg ? @chrom_col = arg : @chrom_col
+    def info_col(arg=nil)
+      arg ? @info_col = arg : @info_col
     end
 
-    def start_col(arg=nil)
-      arg ? @start_col = arg : @start_col
+    def info_header(arg=nil)
+      arg ? @info_header = arg : (@info_header ||= @name)
     end
 
-    def end_col(arg=nil)
-      arg ? @end_col = arg : @end_col
+    def vcf_col(arg=nil)
+      arg ? @vcf_col = arg : @vcf_col
     end
   end
 
@@ -115,12 +131,12 @@ module AvSummary
       end
     end
     
-    def annotation(title, &block)
-      annot = Annotation.new(title)
+    def annotation(name, &block)
+      annot = Annotation.new(name)
       annot.instance_eval(&block)
       @annotations ||= Array.new
-      if @annotations.any?{|x|x.title == annot.title}
-        $stderr.puts "[ERROR] annotations title must be UNIQUE in an avconfig file"
+      if @annotations.any?{|x|x.name == annot.name}
+        $stderr.puts "[ERROR] annotations name must be UNIQUE in an avconfig file"
         raise
       end
       @annotations << annot 
@@ -139,19 +155,21 @@ module AvSummary
         fout.puts "# SNV"
         fout.puts ["${cmd}",
                    "--format vcf4",
+                   "--includeinfo",
                    "--allallele",
                    config.source.snv_vcf,
                    "> #{config.source.snv_av}",
                    "2> #{config.source.snv_av}.log",
-                   ].join(" ")
+                   ].join(" ").squeeze(" ")
         fout.puts "# INDEL"
         fout.puts ["${cmd}",
                    "--format vcf4",
+                   "--includeinfo",
                    "--allallele",
                    config.source.indel_vcf,
                    "> #{config.source.indel_av}",
                    "2> #{config.source.indel_av}.log",
-                   ].join(" ")
+                   ].join(" ").squeeze(" ")
       end
 
       open(AVSCRIPT, 'w') do |fout|
@@ -160,30 +178,34 @@ module AvSummary
         fout.puts "db=\"#{config.source.database_dir}\""
         fout.puts "# SNV"
         fout.puts "mkdir -p #{config.source.snv_dir}"
-        config.tables.each_with_index do |tab|
-          if tab.type.include? :snv
+        config.annotations.each_with_index do |annot|
+          if annot.type.include? :snv
             fout.puts ["${cmd}",
-                       "--outfile #{config.source.snv_dir}/#{tab.title}",
-                       "--#{tab.mode}",
-                       "#{tab.avopt}",
+                       "--outfile #{config.source.snv_dir}/#{annot.name}",
+                       "--#{annot.mode}",
+                       "--buildver #{annot.buildver}",
+                       "--dbtype #{annot.dbtype}",
+                       "#{annot.avopt}",
                        "#{config.source.snv_av}",
                        "${db}",
-                       "2> #{config.source.snv_dir}/#{tab.title}.log",
-                      ].join(" ")
+                       "2> #{config.source.snv_dir}/#{annot.name}.log",
+                      ].join(" ").squeeze(" ")
           end
         end
         fout.puts "# INDEL"
         fout.puts "mkdir -p #{config.source.indel_dir}"
-        config.tables.each do |tab|
-          if tab.type.include? :indel
+        config.annotations.each do |annot|
+          if annot.type.include? :indel
             fout.puts ["${cmd}",
-                       "--outfile #{config.source.indel_dir}/#{tab.title}",
-                       "--#{tab.mode}",
-                       "#{tab.avopt}",
+                       "--outfile #{config.source.indel_dir}/#{annot.name}",
+                       "--#{annot.mode}",
+                       "--buildver #{annot.buildver}",
+                       "--dbtype #{annot.dbtype}",
+                       "#{annot.avopt}",
                        "#{config.source.indel_av}",
                        "${db}",
-                       "2> #{config.source.snv_dir}/#{tab.title}.log",
-                      ].join(" ")
+                       "2> #{config.source.snv_dir}/#{annot.name}.log",
+                      ].join(" ").squeeze(" ")
           end
         end
       end
@@ -196,6 +218,8 @@ module AvSummary
         store_vcfs
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         store_annots
+        integrate_vcfs_annots
+        ################pp annot_dbs["CytoBand"][:snv].each{|k,v|p k,v}
       ensure
         self.vcf_dbs ||= Hash.new
         vcf_dbs.each_value{|v|v.close}
@@ -271,20 +295,58 @@ module AvSummary
     def store_annots
       self.annot_dbs ||= Hash.new
       config.annotations.each do |annot|
+        $stderr.puts "[avsummary integrate] - #{annot.name} annotation(s)"
         db = Hash.new
         if annot.type.include? :snv
           db[:snv] = KyotoCabinet::DB.new
           db[:snv].open
+          store_an_annot(db, config.source, annot, :snv)
         end
         if annot.type.include? :indel
           db[:indel] = KyotoCabinet::DB.new
           db[:indel].open
+          store_an_annot(db, config.source, annot, :indel)
         end
-        self.annot_dbs[annot.title] = db          
+        self.annot_dbs[annot.name] = db          
       end
     end
 
-    def integrate_tables(snv_db, indel_db)
+    def store_an_annot(db, source, annot, type)
+      open(annot_filename(source, annot, type), "r") do |fin|
+        fin.lines.each do |row|
+          cols = row.chomp.split("\t")
+          vcfcol = parse_vcf_row(cols[annot.vcf_col..-1].join("\t"))
+          key = "#{vcfcol.chrom}:#{vcfcol.pos}"
+          value = cols.values_at(annot.info_col).join("\t")
+          if db[type][key]
+            db[type][key] = "#{db[key]}\n#{value}"
+          else
+            db[type][key] = value
+          end          
+        end
+      end
+    end
+
+    def annot_filename(source, annot, type)
+      case type
+      when :snv
+        dir = source.snv_dir
+      when :indel
+        dir = source.indel_dir
+      else
+        raise "this should not happen"
+      end
+
+      case annot.dbtype.downcase
+      when "cytoband"
+        return "#{dir}/#{annot.name}.#{annot.buildver}_cytoBand"
+      else
+        raise "the dbtype #{source.dbtype} is not supported"
+      end
+    end
+
+    def integrate_vcfs_annots
+      config.annotations
       #
     end
 
