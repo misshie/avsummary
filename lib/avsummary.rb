@@ -189,25 +189,12 @@ module AvSummary
     def integrate
       begin
         $stderr.puts "[avsummary integrate] loading a vcf file" 
-        vcf_dbs = Hash.new
-        vcf_dbs[:snv] = KyotoCabinet::DB.new
-        vcf_dbs[:snv].open("*")
-        vcf_dbs[:indel] = KyotoCabinet::DB.new
-        vcf_dbs[:indel].open("*")
-        store_vcfs(vcf_dbs)
-  
+        store_vcfs
         $stderr.puts "[avsummary integrate] loading annotation(s)"
-        # annot_dbs = Array.new
-        # config.annotations.each do |annot|
-        #   annot_db = KyotoCabinet::DB.new
-        #   annot_db.open("*")
-        #   store_annot(annot, annot_db)
-        #   annot_dbs << annot_db          
-        # end
-        # integrate(vcf_dbs, annot_dbs)
+        store_annots
       ensure
         vcf_dbs.each{|k,v|v.close}
-        #annot_dbs.each{|db|db.close}
+        annot_dbs.each{|db|db.close}
       end
     end   
     
@@ -215,11 +202,6 @@ module AvSummary
 
     attr_accessor :vcf_dbs
     attr_accessor :annot_dbs
-
-    #def vcf_dbs=(x);   @vcf_dbs = x;   end
-    #def vcf_dbs    ;   @vcf_dbs;       end
-    #def annot_dbs=(x); @annot_dbs = x; end
-    #def annot_dbs;     @annoy_dbs;     end
 
     def config
       unless @config
@@ -253,7 +235,13 @@ module AvSummary
       vcfrow   
     end
 
-    def store_vcfs(vcf_dbs)
+    def store_vcfs
+      self.vcf_dbs = Hash.new
+      self.vcf_dbs[:snv] = KyotoCabinet::DB.new
+      vcf_dbs[:snv].open("*")
+      self.vcf_dbs[:indel] = KyotoCabinet::DB.new
+      vcf_dbs[:indel].open("*")
+
       [ { :vcf => config.source.snv_vcf,
           :db  => vcf_dbs[:snv]},
         { :vcf => config.source.indel_vcf,
@@ -274,15 +262,15 @@ module AvSummary
       end # each
     end # def kc_store
 
-    def store_annot(annot, annot_db)
-      
-
-
-
-      #   load_table(snv_db, indel_db)
-      
+    def store_annots
+      self.annot_dbs = Array.new
+      config.annotations.each do |annot|
+        db = KyotoCabinet::DB.new
+        db.open("*")
+        self.annot_dbs << db          
+      end
     end
-      
+
     def load_table(snv_db, indel_db)
       
     end
