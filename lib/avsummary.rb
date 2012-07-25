@@ -329,21 +329,25 @@ module AvSummary
     end
 
     def store_an_annot(db, source, annot, type)
-      p annot_filename(source, annot, type)
-
-      # open(annot_filename(source, annot, type), "r") do |fin|
-      #   fin.lines.each do |row|
-      #     cols = row.chomp.split("\t")
-      #     vcfcol = parse_av_row(cols[annot.vcf_col..-1].join("\t"))
-      #     key = "#{vcfcol.chrom}:#{vcfcol.pos}"
-      #     value = cols.values_at(annot.info_col).join("\t")
-      #     if db[type][key]
-      #       db[type][key] = "#{db[key]}\n#{value}"
-      #     else
-      #       db[type][key] = value
-      #     end          
-      #   end
-      # end
+      case annot.mode.downcase
+      when :geneanno
+        raise "the mode '#{annot.dbtype}' is not supported"
+      when :regionanno, :filter
+        open(annot_filename(source, annot, type), "r") do |fin|
+          fin.lines.each do |row|
+            cols = row.chomp.split("\t")
+            key = "#{cols[2]}:#{cols[3]}-#{cols[4]};#{cols[5]}>#{cols[6]}"
+            value = cols[1]
+            if db[type][key]
+              db[type][key] = "#{db[key]}\n#{value}"
+            else
+              db[type][key] = value
+            end
+          end # lines.each
+        end # open
+      else
+        raise "the mode '#{annot.dbtype}' is not supported"
+      end
     end
 
     def annot_filename(source, annot, type)
