@@ -6,7 +6,9 @@ db="/opt/annovar-humandb"
 mkdir -p SNV
 ${cmd} --outfile SNV/CytoBand --regionanno --buildver hg19 --dbtype cytoband snv500.av ${db} 2> SNV/CytoBand.log
 ${cmd} --outfile SNV/dbSNP130 --filter --buildver hg19 --dbtype snp130 snv500.av ${db} 2> SNV/dbSNP130.log
+${cmd} --outfile SNV/RefGene --geneanno --buildver hg19 --dbtype refgene snv500.av ${db} 2> SNV/RefGene.log
 # INDEL
 mkdir -p INDEL
 ${cmd} --outfile INDEL/CytoBand --regionanno --buildver hg19 --dbtype cytoband indel500.av ${db} 2> SNV/CytoBand.log
 ${cmd} --outfile INDEL/dbSNP130 --filter --buildver hg19 --dbtype snp130 indel500.av ${db} 2> SNV/dbSNP130.log
+${cmd} --outfile INDEL/RefGene --geneanno --buildver hg19 --dbtype refgene indel500.av ${db} 2> SNV/RefGene.log

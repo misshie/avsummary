@@ -305,35 +305,75 @@ module AvSummary
       config.annotations.each do |annot|
         $stderr.puts "[avsummary integrate] - #{annot.name} annotation(s)"
         db = Hash.new
-        if annot.type.include? :snv
-          db[:snv] = KyotoCabinet::DB.new
-          db[:snv].open
-          store_an_annot(db, config.source, annot, :snv)
+        case annot.mode.downcase
+        when :regionanno, :filter
+          if annot.type.include? :snv
+            db[:snv] = KyotoCabinet::DB.new
+            db[:snv].open
+            store_an_annot(db, config.source, annot, :snv)
+          end
+          if annot.type.include? :indel
+            db[:indel] = KyotoCabinet::DB.new
+            db[:indel].open
+            store_an_annot(db, config.source, annot, :indel)
+          end
+          self.annot_dbs[annot.name] = db          
+        when :geneanno
+          if annot.type.include? :snv
+            db[:snv_vf] = KyotoCabinet::DB.new
+            db[:snv_vf].open
+            store_an_annot(db, config.source, annot, :snv_vf)
+            db[:snv_evf] = KyotoCabinet::DB.new
+            db[:snv_evf].open
+            store_an_annot(db, config.source, annot, :snv_evf)
+          end
+          if annot.type.include? :indel
+            db[:indel_vf] = KyotoCabinet::DB.new
+            db[:indel_vf].open
+            store_an_annot(db, config.source, annot, :indel_vf)
+            db[:indel_evf] = KyotoCabinet::DB.new
+            db[:indel_evf].open
+            store_an_annot(db, config.source, annot, :indel_evf)
+          end
+          self.annot_dbs[annot.name] = db          
         end
-        if annot.type.include? :indel
-          db[:indel] = KyotoCabinet::DB.new
-          db[:indel].open
-          store_an_annot(db, config.source, annot, :indel)
-        end
-        self.annot_dbs[annot.name] = db          
       end
     end
 
     def store_an_annot(db, source, annot, type)
       case annot.mode.downcase
-      when :geneanno
-        raise "the mode '#{annot.dbtype}' is not supported"
       when :regionanno, :filter
-         open(annot_filename(source, annot, type), "r") do |fin|
+        open(annot_filename(source, annot, type), "r") do |fin|
           fin.lines.each do |row|
             cols = row.chomp.split("\t")
             key = "#{cols[2]}:#{cols[3]}-#{cols[4]};#{cols[5]}>#{cols[6]}"
             value = cols[1]
             if db[type][key]
-              db[type][key] = "#{db[key]}\n#{value}"
+              raise "duplicated key in '#{annot.name}/#{type}' is found!"
+              #db[type][key] = "#{db[key]}\n#{value}"
             else
               db[type][key] = value
             end
+          end # lines.each
+        end # open
+      when :geneanno
+        open(annot_filename(source, annot, type), "r") do |fin|
+          fin.lines.each do |row|
+            cols = row.chomp.split("\t")
+            case type
+            when :snv_vf, :indel_vf
+              key = "#{cols[2]}:#{cols[3]}-#{cols[4]};#{cols[5]}>#{cols[6]}"
+              value = "#{cols[0]}\t#{cols[1]}"
+            when :snv_evf, :indel_evf
+              key = "#{cols[3]}:#{cols[4]}-#{cols[5]};#{cols[6]}>#{cols[7]}"
+              value = "#{cols[1]}\t#{cols[2]}"
+            end
+             if db[type][key]
+               raise "duplicated key in '#{annot.name}/#{type}' is found!"
+               #db[type][key] = "#{db[key]}\n#{value}"
+             else
+               db[type][key] = value
+             end
           end # lines.each
         end # open
       else
@@ -343,9 +383,9 @@ module AvSummary
 
     def annot_filename(source, annot, type)
       case type
-      when :snv
+      when :snv, :snv_vf, :snv_evf
         dir = source.snv_dir
-      when :indel
+      when :indel, :indel_vf, :indel_evf
         dir = source.indel_dir
       else
         raise "this should not happen"
@@ -353,7 +393,12 @@ module AvSummary
 
       case annot.mode.downcase
       when :geneanno
-        raise "the mode '#{annot.dbtype}' is not supported"
+        case type
+        when :snv_vf, :indel_vf
+          return Dir["#{dir}/#{annot.name}.variant_function"].first
+        when :snv_evf, :indel_evf
+          return Dir["#{dir}/#{annot.name}.exonic_variant_function"].first
+        end
       when :regionanno
         return Dir["#{dir}/#{annot.name}.#{annot.buildver}_*"].first
       when :filter
@@ -364,18 +409,16 @@ module AvSummary
     end
 
     def build_info_header(type)
-      case type
-      when :snv
-        return config.annotations.
-          select{|x|x.type.include?(:snv)}.
-          map{|x|x.name}.
-          flatten.join("\t")
-      when :indel
-        return config.annotations.
-          select{|x|x.type.include?(:indel)}.
-          map{|x|x.name}.
-          flatten.join("\t")
+      fields = Array.new
+      config.annotations.select{|x|x.type.include?(type)}.each do |annot|
+        case annot.mode
+        when :regionanno, :filter
+          fields << annot.name
+        when :geneanno
+          fields << "#{annot.name}:var_func" << "#{annot.name}:exon_var_func"
+        end
       end
+      fields.join("\t")
     end
 
     def sorted_vcf_keys(type)
@@ -405,17 +448,35 @@ module AvSummary
 
       types.each do |type|
         open(wfile[type], "w") do |fsnv|
-          fsnv.puts "#{AV_HEADER}\t#{build_info_header(:snv)}"
+          fsnv.puts "#{AV_HEADER}\t#{build_info_header(type)}"
           sorted_vcf_keys(type).each do |key|
             values = Array.new
             values << key
             values << av_dbs[type][key]
             config.annotations.each do |annot|
-              hit = annot_dbs[annot.name][type][key]
-              if hit
-                values << hit
-              else 
-                values << "none"
+              case annot.mode.downcase
+              when :regionanno, :filter
+                hit = annot_dbs[annot.name][type][key]
+                if hit
+                  values << hit
+                else 
+                  values << "none"
+                end
+              when :geneanno
+                hit_vf  = annot_dbs[annot.name]["#{type}_vf".to_sym][key]
+                if hit_vf
+                  values << hit_vf
+                else
+                  values << "none" << "none"
+                end
+                hit_evf = annot_dbs[annot.name]["#{type}_evf".to_sym][key]
+                if hit_evf
+                  values << hit_evf
+                else
+                  values << "none" << "none"
+                end
+              else
+                raise "this should not happen"
               end
             end
             fsnv.puts values.join("\t")

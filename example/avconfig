@@ -28,11 +28,12 @@ annotation "dbSNP130" do
   dbtype :snp130
 end
 
-# annotation "RefGene" do
-#   type :snv, :indel
-#   mode :geneanno
-#   avopt "--buildver hg19"
-# end
+annotation "RefGene" do
+  type :snv, :indel
+  mode :geneanno
+  buildver :hg19
+  dbtype :refgene
+end
 
 # annotation "EnsGene" do
 #   type :snv, :indel
