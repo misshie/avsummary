@@ -402,15 +402,26 @@ module AvSummary
     end
 
     def integrate_annots
+      types = Array.new
+      wfile = Hash.new
       if config.source.snv_summary
-        open(config.source.snv_summary, "w") do |fsnv|
+        types << :snv
+        wfile[:snv] = config.source.snv_summary
+      end
+      if config.source.indel_summary
+        types << :indel 
+        wfile[:indel] = config.source.indel_summary
+      end
+
+      types.each do |type|
+        open(wfile[type], "w") do |fsnv|
           fsnv.puts "#{AV_HEADER}\t#{build_info_header(:snv)}"
-          sorted_vcf_keys(:snv).each do |key|
+          sorted_vcf_keys(type).each do |key|
             values = Array.new
             values << key
-            values << av_dbs[:snv][key]
+            values << av_dbs[type][key]
             config.annotations.each do |annot|
-              hit = annot_dbs[annot.name][:snv][key]
+              hit = annot_dbs[annot.name][type][key]
               if hit
                 values << hit
               else 
@@ -421,12 +432,6 @@ module AvSummary
           end
         end
       end
-      
-      # if source.indel_vcf
-      #   open(config.source.indel_summary, "w") do |findel|
-      #     findel.puts "#{VCF_HEADER}\t#{build_info_header(:indel)}"
-      #   end
-      # end
     end
 
     def generate_awk_templates(snv_db, indel_db)
