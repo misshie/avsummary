@@ -113,18 +113,6 @@ module AvSummary
     def avopt(arg=nil)
       arg ? @avopt = arg : @avopt
     end
-
-    # def info_col(arg=nil)
-    #   arg ? @info_col = arg : @info_col
-    # end
-
-    def info_header(arg=nil)
-      arg ? @info_header = arg : (@info_header ||= @name)
-    end
-
-    #   def vcf_col(arg=nil)
-    #     arg ? @vcf_col = arg : @vcf_col
-    #   end
   end
 
   class Config
@@ -336,6 +324,7 @@ module AvSummary
       when :geneanno
         raise "the mode '#{annot.dbtype}' is not supported"
       when :regionanno, :filter
+        p annot_filename(source, annot, type)
         open(annot_filename(source, annot, type), "r") do |fin|
           fin.lines.each do |row|
             cols = row.chomp.split("\t")
@@ -369,7 +358,7 @@ module AvSummary
       when :regionanno
         return Dir["#{dir}/#{annot.name}.#{annot.buildver}_*"].first
       when :filter
-        raise "the mode '#{annot.dbtype}' is not supported"
+        return Dir["#{dir}/#{annot.name}.#{annot.buildver}_*_dropped"].first
       else
         raise "the mode '#{annot.dbtype}' is not supported"
       end
@@ -380,12 +369,12 @@ module AvSummary
       when :snv
         return config.annotations.
           select{|x|x.type.include?(:snv)}.
-          map{|x|x.info_header}.
+          map{|x|x.name}.
           flatten.join("\t")
       when :indel
         return config.annotations.
           select{|x|x.type.include?(:indel)}.
-          map{|x|x.info_header}.
+          map{|x|x.name}.
           flatten.join("\t")
       end
     end

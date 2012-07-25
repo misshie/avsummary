@@ -19,7 +19,13 @@ annotation "CytoBand" do
   mode :regionanno
   buildver :hg19
   dbtype :cytoband
-  info_header "CytoBand"
+end
+
+annotation "dbSNP130" do
+  type :snv, :indel
+  mode :filter
+  buildver :hg19
+  dbtype :snp130
 end
 
 # annotation "RefGene" do
@@ -64,11 +70,6 @@ end
 #   avopt "--buildver hg19 --dbtype generic --genericcdbfile hg19_cg69.txt"
 # end
 
-# annotation "dbSNP135" do
-#   type :snv, :indel
-#   mode :filter
-#   avopt "--buildver hg19 --dbtype snp135"
-# end
 
 # annotation "dbSNP135Common" do
 #   type :snv, :indel
