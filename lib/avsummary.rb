@@ -324,8 +324,7 @@ module AvSummary
       when :geneanno
         raise "the mode '#{annot.dbtype}' is not supported"
       when :regionanno, :filter
-        p annot_filename(source, annot, type)
-        open(annot_filename(source, annot, type), "r") do |fin|
+         open(annot_filename(source, annot, type), "r") do |fin|
           fin.lines.each do |row|
             cols = row.chomp.split("\t")
             key = "#{cols[2]}:#{cols[3]}-#{cols[4]};#{cols[5]}>#{cols[6]}"
