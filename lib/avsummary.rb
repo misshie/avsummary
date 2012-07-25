@@ -113,22 +113,22 @@ module AvSummary
       arg ? @avopt = arg : @avopt
     end
 
-    def info_col(arg=nil)
-      arg ? @info_col = arg : @info_col
-    end
+    # def info_col(arg=nil)
+    #   arg ? @info_col = arg : @info_col
+    # end
 
     def info_header(arg=nil)
       arg ? @info_header = arg : (@info_header ||= @name)
     end
 
-    def vcf_col(arg=nil)
-      arg ? @vcf_col = arg : @vcf_col
-    end
+    #   def vcf_col(arg=nil)
+    #     arg ? @vcf_col = arg : @vcf_col
+    #   end
   end
 
   class Config
     attr_reader :annotations
-   
+    
     def source(&block)
       if block_given?
         @source = Source.new
@@ -168,7 +168,7 @@ module AvSummary
                    config.source.snv_vcf,
                    "> #{config.source.snv_av}",
                    "2> #{config.source.snv_av}.log",
-                   ].join(" ").squeeze(" ")
+                  ].join(" ").squeeze(" ")
         fout.puts "# INDEL"
         fout.puts ["${cmd}",
                    "--format vcf4",
@@ -177,7 +177,7 @@ module AvSummary
                    config.source.indel_vcf,
                    "> #{config.source.indel_av}",
                    "2> #{config.source.indel_av}.log",
-                   ].join(" ").squeeze(" ")
+                  ].join(" ").squeeze(" ")
       end
 
       open(AVSCRIPT, 'w') do |fout|
@@ -224,9 +224,8 @@ module AvSummary
       begin
         $stderr.puts "[avsummary integrate] loading converted ANNOVAR input file(s)" 
         store_avfiles
-        av_dbs[:snv].each{|k,v|p k}
-        # $stderr.puts "[avsummary integrate] loading annotation(s)"
-        # store_annots
+        $stderr.puts "[avsummary integrate] loading annotation(s)"
+        store_annots
         # integrate_annots
       ensure
         self.av_dbs ||= Hash.new
@@ -330,19 +329,21 @@ module AvSummary
     end
 
     def store_an_annot(db, source, annot, type)
-      open(annot_filename(source, annot, type), "r") do |fin|
-        fin.lines.each do |row|
-          cols = row.chomp.split("\t")
-          vcfcol = parse_av_row(cols[annot.vcf_col..-1].join("\t"))
-          key = "#{vcfcol.chrom}:#{vcfcol.pos}"
-          value = cols.values_at(annot.info_col).join("\t")
-          if db[type][key]
-            db[type][key] = "#{db[key]}\n#{value}"
-          else
-            db[type][key] = value
-          end          
-        end
-      end
+      p annot_filename(source, annot, type)
+
+      # open(annot_filename(source, annot, type), "r") do |fin|
+      #   fin.lines.each do |row|
+      #     cols = row.chomp.split("\t")
+      #     vcfcol = parse_av_row(cols[annot.vcf_col..-1].join("\t"))
+      #     key = "#{vcfcol.chrom}:#{vcfcol.pos}"
+      #     value = cols.values_at(annot.info_col).join("\t")
+      #     if db[type][key]
+      #       db[type][key] = "#{db[key]}\n#{value}"
+      #     else
+      #       db[type][key] = value
+      #     end          
+      #   end
+      # end
     end
 
     def annot_filename(source, annot, type)
@@ -355,11 +356,15 @@ module AvSummary
         raise "this should not happen"
       end
 
-      case annot.dbtype.downcase
-      when "cytoband"
-        return "#{dir}/#{annot.name}.#{annot.buildver}_cytoBand"
+      case annot.mode.downcase
+      when :geneanno
+        raise "the mode '#{annot.dbtype}' is not supported"
+      when :regionanno
+        return Dir["#{dir}/#{annot.name}.#{annot.buildver}_*"].first
+      when :filter
+        raise "the mode '#{annot.dbtype}' is not supported"
       else
-        raise "the dbtype #{source.dbtype} is not supported"
+        raise "the mode '#{annot.dbtype}' is not supported"
       end
     end
 

@@ -17,11 +17,9 @@ end
 annotation "CytoBand" do
   type :snv, :indel
   mode :regionanno
-  buildver "hg19"
-  dbtype "cytoband"
-  info_col 1
+  buildver :hg19
+  dbtype :cytoband
   info_header "CytoBand"
-  vcf_col 7
 end
 
 # annotation "RefGene" do
