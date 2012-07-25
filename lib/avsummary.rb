@@ -361,24 +361,38 @@ module AvSummary
       end
     end
 
-    def sorted_keys(type)
-      keys = Array.new
-      vcf_dbs[type].each_key{|k|keys << k.first}
-      keys.sort_by do |k|
-        chr, pos = k.split(":")
-        [VCF_ORDER.index(chr), Integer(pos)]
+    def sorted_vcf_keys(type)
+      @sorted_vcf_keys ||= Hash.new
+      unless @sorted_vcf_keys[type]
+        keys = Array.new
+        vcf_dbs[type].each_key{|k|keys << k.first}
+        @sorted_vcf_keys[type] = keys.sort_by do |k|
+          chr, pos = k.split(":")
+          [VCF_ORDER.index(chr), Integer(pos)]
+        end
       end
+      @sorted_vcf_keys[type]
     end
 
     def integrate_vcfs_annots
-      open(config.source.snv_summary, "w") do |fsnv|
-        fsnv.puts "#{VCF_HEADER}\t#{build_info_header(:snv)}"
-        sorted_keys(:snv).each do |key|
-          fsnv.puts "#{key}\t#{vcf_dbs[:snv][key]}"
+      if source.snv_vcf
+        open(config.source.snv_summary, "w") do |fsnv|
+          fsnv.puts "#{VCF_HEADER}\t#{build_info_header(:snv)}"
+          sorted_vcf_keys(:snv).each do |key|
+            values = Array.new
+            values << vcf_dbs[:snv][key]
+            config.annotations.each do |annot|
+              values << annot_dbs[annot.name][:snv]
+            end
+            fsnv.puts values.join("\t")
+          end
         end
       end
-      open(config.source.indel_summary, "w") do |findel|
-        findel.puts "#{VCF_HEADER}\t#{build_info_header(:indel)}"
+      
+      if source.indel_vcf
+        open(config.source.indel_summary, "w") do |findel|
+          findel.puts "#{VCF_HEADER}\t#{build_info_header(:indel)}"
+        end
       end
     end
 
