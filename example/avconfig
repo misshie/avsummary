@@ -1,6 +1,7 @@
 # -*- coding: utf-8; mode: ruby; -*-
 
 source do
+  buildver :hg19
   snv_dir "SNV"
   snv_vcf "snv500.vcf"
   snv_av  "snv500.av"
@@ -17,41 +18,38 @@ end
 annotation "CytoBand" do
   type :snv, :indel
   mode :regionanno
-  buildver :hg19
   dbtype :cytoband
-end
-
-annotation "dbSNP130" do
-  type :snv, :indel
-  mode :filter
-  buildver :hg19
-  dbtype :snp130
 end
 
 annotation "RefGene" do
   type :snv, :indel
   mode :geneanno
-  buildver :hg19
   dbtype :refgene
 end
 
-# annotation "EnsGene" do
-#   type :snv, :indel
-#   mode :geneanno
-#   avopt "--buildver hg19"
-# end
+annotation "EnsGene" do
+  type :snv, :indel
+  mode :geneanno
+  dbtype :ensgene
+end
 
-# annotation "miRNA" do
-#   type :snv, :indel
-#   mode :regionanno
-#   avopt "--buildver hg19 --dbtype mirna"
-# end
+annotation "GENCODE_basic_V7" do
+  type :snv, :indel
+  mode :geneanno
+  dbtype :wgEncodeGencodeBasicV7
+end
 
-# annotation "miRNAtarget" do
-#   type :snv, :indel
-#   mode :regionanno
-#   avopt "--buildver hg19 --dbtype mirnatarget"
-# end
+annotation "miRNA" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype :mirna
+end
+
+annotation "miRNAtarget" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype :mirnatarget
+end
 
 # annotation "SegDup" do
 #   type :snv, :indel

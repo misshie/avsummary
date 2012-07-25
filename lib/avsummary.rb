@@ -38,6 +38,10 @@ module AvSummary
   end
 
   class Source
+    def buildver(arg=nil)
+      arg ? @buildver = arg : @buildver
+    end
+
     def snv_vcf(arg=nil)
       arg ? @snv_vcf = arg : @snv_vcf
     end
@@ -102,9 +106,9 @@ module AvSummary
       arg ? @mode = arg : @mode
     end
 
-    def buildver(arg=nil)
-      arg ? @buildver = arg : @buildver
-    end
+    # def buildver(arg=nil)
+    #   arg ? @buildver = arg : @buildver
+    # end
 
     def dbtype(arg=nil)
       arg ? @dbtype = arg : @dbtype
@@ -182,7 +186,7 @@ module AvSummary
             fout.puts ["${cmd}",
                        "--outfile #{config.source.snv_dir}/#{annot.name}",
                        "--#{annot.mode}",
-                       "--buildver #{annot.buildver}",
+                       "--buildver #{config.source.buildver}",
                        "--dbtype #{annot.dbtype}",
                        "#{annot.avopt}",
                        "#{config.source.snv_av}",
@@ -198,7 +202,7 @@ module AvSummary
             fout.puts ["${cmd}",
                        "--outfile #{config.source.indel_dir}/#{annot.name}",
                        "--#{annot.mode}",
-                       "--buildver #{annot.buildver}",
+                       "--buildver #{config.source.buildver}",
                        "--dbtype #{annot.dbtype}",
                        "#{annot.avopt}",
                        "#{config.source.indel_av}",
@@ -208,6 +212,8 @@ module AvSummary
           end
         end
       end
+      $stderr.puts "execute '. run-convert2annovar.sh', then"
+      $etderr.puts "execute '. run-annotate-variation.sh'"
     end
 
     desc 'integrate', 'integrate multiple annotate-variation results'
@@ -343,6 +349,8 @@ module AvSummary
     def store_an_annot(db, source, annot, type)
       case annot.mode.downcase
       when :regionanno, :filter
+        p source,annot,type
+        p annot_filename(source, annot, type)
         open(annot_filename(source, annot, type), "r") do |fin|
           fin.lines.each do |row|
             cols = row.chomp.split("\t")
@@ -400,9 +408,9 @@ module AvSummary
           return Dir["#{dir}/#{annot.name}.exonic_variant_function"].first
         end
       when :regionanno
-        return Dir["#{dir}/#{annot.name}.#{annot.buildver}_*"].first
+        return Dir["#{dir}/#{annot.name}.#{config.source.buildver}_*"].first
       when :filter
-        return Dir["#{dir}/#{annot.name}.#{annot.buildver}_*_dropped"].first
+        return Dir["#{dir}/#{annot.name}.#{config.source.buildver}_*_dropped"].first
       else
         raise "the mode '#{annot.dbtype}' is not supported"
       end
