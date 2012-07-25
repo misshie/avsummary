@@ -11,11 +11,12 @@ module AvSummary
   AVCONFIG = "avconfig"
   AVCONVERT = "run-convert2annovar.sh"
   AVSCRIPT = "run-annotate-variartion.sh"
-  VCF_ORDER =
+  CHR_ORDER =
     %w(M 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y) \
     .map{|e|"chr#{e}"}
-  VCF_HEADER =
-    %w(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample).join("\t")
+  AV_HEADER =
+    %w(#key av_chr av_start av_end av_ref av_alt 
+       CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample).join("\t")
 
   AvRow = Striuct.define do
     member :key, String # a key value for hash DB
@@ -226,12 +227,12 @@ module AvSummary
         store_avfiles
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         store_annots
-        # integrate_annots
+        integrate_annots
       ensure
         self.av_dbs ||= Hash.new
         av_dbs.each_value{|v|v.close}
-        # self.annot_dbs ||= Hash.new
-        # annot_dbs.each_value{|va|va.each_value{|vb|vb.close}}
+        self.annot_dbs ||= Hash.new
+        annot_dbs.each_value{|va|va.each_value{|vb|vb.close}}
       end
     end   
     
@@ -393,33 +394,39 @@ module AvSummary
         keys = Array.new
         av_dbs[type].each_key{|k|keys << k.first}
         @sorted_vcf_keys[type] = keys.sort_by do |k|
-          chr, pos = k.split(":")
-          [VCF_ORDER.index(chr), Integer(pos)]
+          chr, st, ed, ref, alt = k.split(/:|-|;|>/)
+          [CHR_ORDER.index(chr), Integer(st), Integer(ed), ref, alt]
         end
       end
       @sorted_vcf_keys[type]
     end
 
     def integrate_annots
-      if source.snv_vcf
+      if config.source.snv_summary
         open(config.source.snv_summary, "w") do |fsnv|
-          fsnv.puts "#{VCF_HEADER}\t#{build_info_header(:snv)}"
+          fsnv.puts "#{AV_HEADER}\t#{build_info_header(:snv)}"
           sorted_vcf_keys(:snv).each do |key|
             values = Array.new
+            values << key
             values << av_dbs[:snv][key]
             config.annotations.each do |annot|
-              values << annot_dbs[annot.name][:snv]
+              hit = annot_dbs[annot.name][:snv][key]
+              if hit
+                values << hit
+              else 
+                values << "none"
+              end
             end
             fsnv.puts values.join("\t")
           end
         end
       end
       
-      if source.indel_vcf
-        open(config.source.indel_summary, "w") do |findel|
-          findel.puts "#{VCF_HEADER}\t#{build_info_header(:indel)}"
-        end
-      end
+      # if source.indel_vcf
+      #   open(config.source.indel_summary, "w") do |findel|
+      #     findel.puts "#{VCF_HEADER}\t#{build_info_header(:indel)}"
+      #   end
+      # end
     end
 
     def generate_awk_templates(snv_db, indel_db)

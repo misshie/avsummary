@@ -26,18 +26,12 @@ end
 #   type :snv, :indel
 #   mode :geneanno
 #   avopt "--buildver hg19"
-#   chrom_col 3
-#   start_col 4
-#   end_col 5
 # end
 
 # annotation "EnsGene" do
 #   type :snv, :indel
 #   mode :geneanno
 #   avopt "--buildver hg19"
-#   chrom_col 1
-#   start_col 2
-#   end_col 3
 # end
 
 # annotation "miRNA" do
