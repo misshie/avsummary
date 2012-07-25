@@ -160,6 +160,7 @@ module AvSummary
     def annotate
       open(AVCONVERT, 'w') do |fout|
         fout.puts "#!/bin/bash"
+        fout.puts "set -e"
         fout.puts "cmd=\"#{config.source.convert2annovar}\""
         fout.puts "# SNV"
         fout.puts ["${cmd}",
@@ -183,6 +184,7 @@ module AvSummary
 
       open(AVSCRIPT, 'w') do |fout|
         fout.puts "#!/bin/bash"
+        fout.puts "set -e"
         fout.puts "cmd=\"#{config.source.annotate_variation}\""
         fout.puts "db=\"#{config.source.database_dir}\""
         fout.puts "# SNV"

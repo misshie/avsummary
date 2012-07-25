@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 cmd="/opt/annovar/annotate_variation.pl"
 db="/opt/annovar-humandb"
 # SNV
