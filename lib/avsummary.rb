@@ -222,22 +222,23 @@ module AvSummary
     desc 'integrate', 'integrate multiple annotate-variation results'
     def integrate
       begin
-        $stderr.puts "[avsummary integrate] loading a vcf file" 
-        store_avfile
-        $stderr.puts "[avsummary integrate] loading annotation(s)"
-        store_annots
-        integrate_vcfs_annots
+        $stderr.puts "[avsummary integrate] loading converted ANNOVAR input file(s)" 
+        store_avfiles
+        av_dbs[:snv].each{|k,v|p k}
+        # $stderr.puts "[avsummary integrate] loading annotation(s)"
+        # store_annots
+        # integrate_annots
       ensure
-        self.vcf_dbs ||= Hash.new
-        vcf_dbs.each_value{|v|v.close}
-        self.annot_dbs ||= Hash.new
-        annot_dbs.each_value{|va|va.each_value{|vb|vb.close}}
+        self.av_dbs ||= Hash.new
+        av_dbs.each_value{|v|v.close}
+        # self.annot_dbs ||= Hash.new
+        # annot_dbs.each_value{|va|va.each_value{|vb|vb.close}}
       end
     end   
     
     private 
 
-    attr_accessor :vcf_dbs
+    attr_accessor :av_dbs
     attr_accessor :annot_dbs
 
     def config
@@ -254,7 +255,7 @@ module AvSummary
     end
 
     def parse_av_row(row)
-      avrow = AvRow.new
+      av = AvRow.new
       row.chomp!
       return nil if row.start_with? "#"
       cols = row.split("\t")
@@ -275,30 +276,34 @@ module AvSummary
       av.gt_format = cols[13]
       av.genotypes = cols[14..-1]
       av.key = "#{av.av_chrom}:#{av.av_start}-#{av.av_end};#{av.av_ref}>#{av.av_alt}"
-      avrow
+      av
     end
 
-    def store_vcfs
-      self.vcf_dbs ||= Hash.new
-      self.vcf_dbs[:snv] = KyotoCabinet::DB.new
-      vcf_dbs[:snv].open("*")
-      self.vcf_dbs[:indel] = KyotoCabinet::DB.new
-      vcf_dbs[:indel].open("*")
+    def store_avfiles
+      self.av_dbs = Hash.new
+      load_targets = Hash.new
+      if config.source.snv_av
+        self.av_dbs[:snv] = KyotoCabinet::DB.new
+        av_dbs[:snv].open("*")
+        load_targets[:snv] = 
+          {:fname => config.source.snv_av, :db =>av_dbs[:snv]} 
+      end
+      if config.source.indel_av
+        self.av_dbs[:indel] = KyotoCabinet::DB.new
+        av_dbs[:indel].open("*")
+        load_targets[:indel] = 
+          {:fname => config.source.indel_av, :db =>av_dbs[:indel]} 
+      end
 
-      [ { :vcf => config.source.snv_vcf,
-          :db  => vcf_dbs[:snv]},
-        { :vcf => config.source.indel_vcf,
-          :db  => vcf_dbs[:indel]} ].each do |vcfdb|
-        open(vcfdb[:vcf]) do |fin|
+      load_targets.each do |type, fname_db|
+        open(fname_db[:fname], 'r') do |fin|
           fin.each_line do |row|
             row.chomp!
-            next if row.start_with? "#"
-            vcfcol = parse_vcf_row(row)
-            key = "#{vcfcol.chrom}:#{vcfcol.pos}"
-            if vcfdb[:db][key]
-              vcfdb[:db][key] = "#{vcfdb[:db][key]}\n#{row}"
+            avrow = parse_av_row(row)
+            if fname_db[:db][avrow.key]
+              fname_db[:db][avrow.key] = "#{fname_db[:db][avrow.key]}\n#{row}"
             else
-              vcfdb[:db][key] = row
+              fname_db[:db][avrow.key] = row
             end          
           end # fin.each_line
         end # open
@@ -328,7 +333,7 @@ module AvSummary
       open(annot_filename(source, annot, type), "r") do |fin|
         fin.lines.each do |row|
           cols = row.chomp.split("\t")
-          vcfcol = parse_vcf_row(cols[annot.vcf_col..-1].join("\t"))
+          vcfcol = parse_av_row(cols[annot.vcf_col..-1].join("\t"))
           key = "#{vcfcol.chrom}:#{vcfcol.pos}"
           value = cols.values_at(annot.info_col).join("\t")
           if db[type][key]
@@ -377,7 +382,7 @@ module AvSummary
       @sorted_vcf_keys ||= Hash.new
       unless @sorted_vcf_keys[type]
         keys = Array.new
-        vcf_dbs[type].each_key{|k|keys << k.first}
+        av_dbs[type].each_key{|k|keys << k.first}
         @sorted_vcf_keys[type] = keys.sort_by do |k|
           chr, pos = k.split(":")
           [VCF_ORDER.index(chr), Integer(pos)]
@@ -386,13 +391,13 @@ module AvSummary
       @sorted_vcf_keys[type]
     end
 
-    def integrate_vcfs_annots
+    def integrate_annots
       if source.snv_vcf
         open(config.source.snv_summary, "w") do |fsnv|
           fsnv.puts "#{VCF_HEADER}\t#{build_info_header(:snv)}"
           sorted_vcf_keys(:snv).each do |key|
             values = Array.new
-            values << vcf_dbs[:snv][key]
+            values << av_dbs[:snv][key]
             config.annotations.each do |annot|
               values << annot_dbs[annot.name][:snv]
             end
