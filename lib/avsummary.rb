@@ -17,7 +17,13 @@ module AvSummary
   VCF_HEADER =
     %w(#CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample).join("\t")
 
-  VcfRow = Striuct.define do
+  AvRow = Striuct.define do
+    member :key, String # a key value for hash DB
+    member :av_chrom, String
+    member :av_start, Integer
+    member :av_end, Integer
+    member :av_ref, String
+    member :av_alt, String
     member :chrom, String
     member :pos, Integer
     member :id, String
@@ -217,7 +223,7 @@ module AvSummary
     def integrate
       begin
         $stderr.puts "[avsummary integrate] loading a vcf file" 
-        store_vcfs
+        store_avfile
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         store_annots
         integrate_vcfs_annots
@@ -246,24 +252,30 @@ module AvSummary
       end
       @config
     end
- 
-    def parse_vcf_row(row)
-      vcfrow = VcfRow.new
+
+    def parse_av_row(row)
+      avrow = AvRow.new
       row.chomp!
       return nil if row.start_with? "#"
       cols = row.split("\t")
-      vcfrow = VcfRow.new
-      vcfrow.chrom = cols[0]
-      vcfrow.pos = Integer(cols[1])
-      vcfrow.id = cols[2]
-      vcfrow.ref = cols[3]
-      vcfrow.alt = cols[4]
-      vcfrow.qual = Float(cols[5])
-      vcfrow.filter = cols[6]
-      vcfrow.info = cols[7]
-      vcfrow.gt_format = cols[8]
-      vcfrow.genotypes = cols[9..-1]
-      vcfrow   
+      av = AvRow.new
+      av.av_chrom  = cols[0]
+      av.av_start  = Integer(cols[1])
+      av.av_end    = Integer(cols[2])
+      av.av_ref    = cols[3]
+      av.av_alt    = cols[4]
+      av.chrom     = cols[5]
+      av.pos       = Integer(cols[6])
+      av.id        = cols[7]
+      av.ref       = cols[8]
+      av.alt       = cols[9]
+      av.qual      = Float(cols[10])
+      av.filter    = cols[11]
+      av.info      = cols[12]
+      av.gt_format = cols[13]
+      av.genotypes = cols[14..-1]
+      av.key = "#{av.av_chrom}:#{av.av_start}-#{av.av_end};#{av.av_ref}>#{av.av_alt}"
+      avrow
     end
 
     def store_vcfs
