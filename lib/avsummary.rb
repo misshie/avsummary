@@ -17,6 +17,7 @@ module AvSummary
   AV_HEADER =
     %w(#key av_chr av_start av_end av_ref av_alt 
        CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample).join("\t")
+  AWK_INDENT = " " * 4
 
   AvRow = Striuct.define do
     member :key, String # a key value for hash DB
@@ -429,7 +430,8 @@ module AvSummary
         when :regionanno, :filter
           fields << annot.name
         when :geneanno
-          fields << "#{annot.name}:var_func" << "#{annot.name}:exon_var_func"
+          fields << "#{annot.name}:var_func1" << "#{annot.name}:var_func2"
+          fields << "#{annot.name}:exon_var_func1" << "#{annot.name}:exon_var_func2"
         end
       end
       fields.join("\t")
@@ -519,16 +521,23 @@ module AvSummary
           config.annotations.select{|x|x.type.include?(type)}.each do |annot|
             case annot.mode
             when :regionanno, :filter
-              fout.puts %!col["#{annot.name}"]=#{colcount}!
+              fout.puts AWK_INDENT + %!cnum["#{annot.name}"]=#{colcount}!
               colcount += 1                               
             when :geneanno
-              fout.puts %!col["#{annot.name}_vf"]=#{colcount}!
+              fout.puts AWK_INDENT + %!cnum["#{annot.name}_vf1"]=#{colcount}!
               colcount += 1
-              fout.puts %!col["#{annot.name}_evf"]=#{colcount}!
+              fout.puts AWK_INDENT + %!cnum["#{annot.name}_vf2"]=#{colcount}!
+              colcount += 1
+              fout.puts AWK_INDENT + %!cnum["#{annot.name}_evf1"]=#{colcount}!
+              colcount += 1
+              fout.puts AWK_INDENT + %!cnum["#{annot.name}_evf2"]=#{colcount}!;
               colcount += 1
             end
           end
           fout.puts "}"
+          fout.puts "{"
+          fout.puts AWK_INDENT + %!split($0,cols,"\t")!
+            fout.puts "}"
         end # open
       end # types.each
     end # def

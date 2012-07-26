@@ -22,55 +22,55 @@ end
 annotation "CytoBand" do
   type :snv, :indel
   mode :regionanno
-  dbtype :cytoband
+  dbtype "cytoband"
 end
 
 annotation "RefGene" do
   type :snv, :indel
   mode :geneanno
-  dbtype :refgene
+  dbtype "refgene"
 end
 
 annotation "EnsGene" do
   type :snv, :indel
   mode :geneanno
-  dbtype :ensgene
+  dbtype "ensgene"
 end
 
 annotation "GENCODE_basic_V7" do
   type :snv, :indel
   mode :geneanno
-  dbtype :wgEncodeGencodeBasicV7
+  dbtype "wgEncodeGencodeBasicV7"
 end
 
 annotation "miRNA" do
   type :snv, :indel
   mode :regionanno
-  dbtype :mirna
+  dbtype "mirna"
 end
 
 annotation "miRNAtarget" do
   type :snv, :indel
   mode :regionanno
-  dbtype :mirnatarget
+  dbtype "mirnatarget"
 end
 
 annotation "SegDup" do
   type :snv, :indel
   mode :regionanno
-  dbtype :segdup
+  dbtype "segdup"
 end
 
 annotation "DGV" do
   type :snv, :indel
   mode :regionanno
-  dbtype :dgv
+  dbtype "dgv"
 end
 
 annotation "dbSNP135" do
    type :snv, :indel
    mode :filter
-  dbtype :snp135
+  dbtype "snp135"
 end
 
 # annotation "dbSNP135NonFlagged" do
@@ -82,14 +82,14 @@ end
 annotation "CG69" do
   type :snv, :indel
   mode :filter
-  dbtype :generic
+  dbtype "generic"
   avopt "--genericdbfile hg19_cg69.txt"
 end
 
 annotation "ESP6500_all" do
   type :snv, :indel
   mode :filter
-  dbtype :generic
+  dbtype "generic"
   avopt "--genericdbfile hg19_esp6500_all.txt"
 end
 
@@ -97,4 +97,11 @@ annotation "1000g2012Feb_all" do
   type :snv, :indel
   mode :filter
   dbtype "1000g2012feb_all"
+end
+
+annotation "SpliceGENCODEv12" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype "gff3"
+  avopt "--gff3dbfile hg19_splice-affecting-GENCODEv12.sort.uniq.gff3"
 end
