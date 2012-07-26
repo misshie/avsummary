@@ -87,7 +87,7 @@ module AvSummary
     end
 
     def indel_awk(arg=nil)
-      arg ? @indel_awk = arg : (@snv_awk ||= "filter-template-indel.awk")
+      arg ? @indel_awk = arg : (@indel_awk ||= "filter-template-indel.awk")
     end
 
     def convert2annovar(arg=nil)
