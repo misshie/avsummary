@@ -5,7 +5,7 @@ require 'kyotocabinet'
 require 'striuct'
 require 'pp'
 
-VERSION = "20120726"
+VERSION = "20120727"
 
 module AvSummary
   AVCONFIG = "avconfig"
@@ -489,7 +489,7 @@ module AvSummary
                 if hit_evf
                   values << hit_evf
                 else
-                  values << "none" << "none"
+                  values << "none" << "none" # 
                 end
               else
                 raise "this should not happen"
@@ -530,13 +530,13 @@ module AvSummary
               colcount += 1
               fout.puts AWK_INDENT + %!cnum["#{annot.name}_evf1"]=#{colcount}!
               colcount += 1
-              fout.puts AWK_INDENT + %!cnum["#{annot.name}_evf2"]=#{colcount}!;
+              fout.puts AWK_INDENT + %!cnum["#{annot.name}_evf2"]=#{colcount}!
               colcount += 1
             end
           end
           fout.puts "}"
           fout.puts "{"
-          fout.puts AWK_INDENT + %!split($0,cols,"\t")!
+          fout.puts AWK_INDENT + 'split($0,cols,"\t")'
             fout.puts "}"
         end # open
       end # types.each
