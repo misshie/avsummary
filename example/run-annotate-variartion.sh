@@ -14,6 +14,7 @@ ${cmd} --outfile SNV/DGV --regionanno --buildver hg19 --dbtype dgv snv500.av ${d
 ${cmd} --outfile SNV/dbSNP135 --filter --buildver hg19 --dbtype snp135 snv500.av ${db} 2> SNV/dbSNP135.log
 ${cmd} --outfile SNV/CG69 --filter --buildver hg19 --dbtype generic --genericdbfile hg19_cg69.txt snv500.av ${db} 2> SNV/CG69.log
 ${cmd} --outfile SNV/ESP6500_all --filter --buildver hg19 --dbtype generic --genericdbfile hg19_esp6500_all.txt snv500.av ${db} 2> SNV/ESP6500_all.log
+${cmd} --outfile SNV/1000g2012Feb_all --filter --buildver hg19 --dbtype 1000g2012feb_all snv500.av ${db} 2> SNV/1000g2012Feb_all.log
 # INDEL
 mkdir -p INDEL
 ${cmd} --outfile INDEL/CytoBand --regionanno --buildver hg19 --dbtype cytoband indel500.av ${db} 2> SNV/CytoBand.log
@@ -27,3 +28,4 @@ ${cmd} --outfile INDEL/DGV --regionanno --buildver hg19 --dbtype dgv indel500.av
 ${cmd} --outfile INDEL/dbSNP135 --filter --buildver hg19 --dbtype snp135 indel500.av ${db} 2> SNV/dbSNP135.log
 ${cmd} --outfile INDEL/CG69 --filter --buildver hg19 --dbtype generic --genericdbfile hg19_cg69.txt indel500.av ${db} 2> SNV/CG69.log
 ${cmd} --outfile INDEL/ESP6500_all --filter --buildver hg19 --dbtype generic --genericdbfile hg19_esp6500_all.txt indel500.av ${db} 2> SNV/ESP6500_all.log
+${cmd} --outfile INDEL/1000g2012Feb_all --filter --buildver hg19 --dbtype 1000g2012feb_all indel500.av ${db} 2> SNV/1000g2012Feb_all.log

@@ -83,7 +83,7 @@ module AvSummary
     end
 
     def indel_summary(arg=nil)
-      arg ? @indel_summary = arg : (@indel_summary ||= "indel_snv.txt")
+      arg ? @indel_summary = arg : (@indel_summary ||= "summary_indel.txt")
     end
 
     def indel_awk(arg=nil)
@@ -451,15 +451,15 @@ module AvSummary
     def integrate_annots
       types = Array.new
       wfile = Hash.new
-      if config.source.snv_summary
+      if config.source.snv_vcf
         types << :snv
         wfile[:snv] = config.source.snv_summary
       end
-      if config.source.indel_summary
+      if config.source.indel_vcf
         types << :indel 
         wfile[:indel] = config.source.indel_summary
       end
-
+ 
       types.each do |type|
         open(wfile[type], "w") do |fsnv|
           fsnv.puts "#{AV_HEADER}\t#{build_info_header(type)}"

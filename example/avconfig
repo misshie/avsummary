@@ -93,8 +93,8 @@ annotation "ESP6500_all" do
   avopt "--genericdbfile hg19_esp6500_all.txt"
 end
 
-# annotation "1000g2012Feb_all" do
-#   type :snv, :indel
-#   mode :filter
-#   dbtype :1000g2012feb_all
-# end
+annotation "1000g2012Feb_all" do
+  type :snv, :indel
+  mode :filter
+  dbtype "1000g2012feb_all"
+end
