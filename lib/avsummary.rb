@@ -74,6 +74,10 @@ module AvSummary
       arg ? @snv_summary = arg : (@snv_summary ||= "summary_snv.txt")
     end
 
+    def snv_awk(arg=nil)
+      arg ? @snv_awk = arg : (@snv_awk ||= "filter-template-snv.awk")
+    end
+
     def indel_dir(arg=nil)
       arg ? @indel_dir = arg : (@indel_dir ||= "INDEL")
     end

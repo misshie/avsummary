@@ -2,17 +2,21 @@
 
 source do
   buildver :hg19
-  snv_dir "SNV"
   snv_vcf "snv500.vcf"
   snv_av  "snv500.av"
-  snv_summary "summary_snv.txt"
-  indel_dir "INDEL"
   indel_vcf "indel500.vcf"
   indel_av "indel500.av"
-  indel_summary "summary_indel.txt"
   convert2annovar "/opt/annovar/convert2annovar.pl"
   annotate_variation "/opt/annovar/annotate_variation.pl"
   database_dir "/opt/annovar-humandb"
+
+  ##  defaults
+  #  snv_dir "SNV"
+  #  snv_summary "summary_snv.txt"
+  #  snv_awk "filter-template-snv.awk"
+  #  indel_dir "INDEL"
+  #  indel_summary "summary_indel.txt"
+  #  indel_awk "filter-template-indel.awk"
 end
 
 annotation "CytoBand" do
