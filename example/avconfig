@@ -10,7 +10,7 @@ source do
   annotate_variation "/opt/annovar/annotate_variation.pl"
   database_dir "/opt/annovar-humandb"
 
-  ##  defaults
+  ##  defaults settings
   #  snv_dir "SNV"
   #  snv_summary "summary_snv.txt"
   #  snv_awk "filter-template-snv.awk"

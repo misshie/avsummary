@@ -5,7 +5,7 @@ require 'kyotocabinet'
 require 'striuct'
 require 'pp'
 
-VERSION = "20120723"
+VERSION = "20120726"
 
 module AvSummary
   AVCONFIG = "avconfig"
@@ -86,6 +86,10 @@ module AvSummary
       arg ? @indel_summary = arg : (@indel_summary ||= "indel_snv.txt")
     end
 
+    def indel_awk(arg=nil)
+      arg ? @indel_awk = arg : (@snv_awk ||= "filter-template-indel.awk")
+    end
+
     def convert2annovar(arg=nil)
       arg ? @convert2annovar = arg : @convert2annovar
     end
@@ -109,10 +113,6 @@ module AvSummary
     def mode(arg=nil)
       arg ? @mode = arg : @mode
     end
-
-    # def buildver(arg=nil)
-    #   arg ? @buildver = arg : @buildver
-    # end
 
     def dbtype(arg=nil)
       arg ? @dbtype = arg : @dbtype
@@ -156,7 +156,6 @@ module AvSummary
     def annotate
       open(AVCONVERT, 'w') do |fout|
         fout.puts "#!/bin/bash"
-        fout.puts "set -e"
         fout.puts "cmd=\"#{config.source.convert2annovar}\""
         fout.puts "# SNV"
         fout.puts ["${cmd}",
@@ -180,7 +179,6 @@ module AvSummary
 
       open(AVSCRIPT, 'w') do |fout|
         fout.puts "#!/bin/bash"
-        fout.puts "set -e"
         fout.puts "cmd=\"#{config.source.annotate_variation}\""
         fout.puts "db=\"#{config.source.database_dir}\""
         fout.puts "# SNV"
@@ -231,6 +229,7 @@ module AvSummary
         $stderr.puts "[avsummary integrate] loading annotation(s)"
         store_annots
         integrate_annots
+        generate_awk_templates
       ensure
         self.av_dbs ||= Hash.new
         av_dbs.each_value{|v|v.close}
@@ -500,11 +499,41 @@ module AvSummary
       end
     end
 
-    def generate_awk_templates(snv_db, indel_db)
-      #
-    end
-  end
-end
+    def generate_awk_templates
+      $stderr.puts "[avsummary integrate] generate awk template(s)" 
+      types = Array.new
+      wfilename = Hash.new
+      if config.source.snv_vcf
+        types << :snv 
+        wfilename[:snv] = config.source.snv_awk
+      end
+      if config.source.indel_vcf
+        types << :indel
+        wfilename[:indel] = config.source.indel_awk
+      end
+      types.each do |type|
+        open(wfilename[type], 'w') do |fout|
+          fout.puts '#!/bin/awk'
+          fout.puts "BEGIN {"
+          colcount = AV_HEADER.split("\t").size + 1
+          config.annotations.select{|x|x.type.include?(type)}.each do |annot|
+            case annot.mode
+            when :regionanno, :filter
+              fout.puts %!col["#{annot.name}"]=#{colcount}!
+              colcount += 1                               
+            when :geneanno
+              fout.puts %!col["#{annot.name}_vf"]=#{colcount}!
+              colcount += 1
+              fout.puts %!col["#{annot.name}_evf"]=#{colcount}!
+              colcount += 1
+            end
+          end
+          fout.puts "}"
+        end # open
+      end # types.each
+    end # def
+  end # class Apprication
+end # module AvSummary
 
 if __FILE__ == $0 
   AvSummary::Application.start
