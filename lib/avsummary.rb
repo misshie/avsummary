@@ -212,8 +212,11 @@ module AvSummary
           end
         end
       end
-      $stderr.puts "execute '. run-convert2annovar.sh', then"
-      $etderr.puts "execute '. run-annotate-variation.sh'"
+      $stderr.puts
+      $stderr.puts "Done. Run '. run-convert2annovar.sh',"
+      $stderr.puts "run '. run-annotate-variation.sh', then"
+      $stderr.puts "run avsummary.rb with i (integrate) command"
+      $stderr.puts
     end
 
     desc 'integrate', 'integrate multiple annotate-variation results'
@@ -241,10 +244,12 @@ module AvSummary
       unless @config
         if File.exist? "./#{AVCONFIG}"
           @config = 
-            Config.new.instance_eval(File.read("./#{AVCONFIG}"))
+            Config.new.instance_eval(File.read("./#{AVCONFIG}"),
+                                     "./#{AVCONFIG}")
         else
           @config = 
-            Config.new.instance_eval(File.read("#{File.dirname(__FILE__)}/#{AVCONFIG}"))
+            Config.new.instance_eval(File.read("#{File.dirname(__FILE__)}/#{AVCONFIG}"),
+                                     "#{File.dirname(__FILE__)}/#{AVCONFIG}")
         end
       end
       @config
@@ -349,8 +354,6 @@ module AvSummary
     def store_an_annot(db, source, annot, type)
       case annot.mode.downcase
       when :regionanno, :filter
-        p source,annot,type
-        p annot_filename(source, annot, type)
         open(annot_filename(source, annot, type), "r") do |fin|
           fin.lines.each do |row|
             cols = row.chomp.split("\t")
