@@ -5,7 +5,7 @@ require 'kyotocabinet'
 require 'striuct'
 require 'pp'
 
-VERSION = "20120727"
+VERSION = "20120731"
 
 module AvSummary
   AVCONFIG = "avconfig"
@@ -517,6 +517,22 @@ module AvSummary
         open(wfilename[type], 'w') do |fout|
           fout.puts '#!/bin/awk'
           fout.puts "BEGIN {"
+          fout.puts AWK_INDENT + %!cnum["key"]=1!
+          fout.puts AWK_INDENT + %!cnum["av_chr"]=2!
+          fout.puts AWK_INDENT + %!cnum["av_start"]=3!
+          fout.puts AWK_INDENT + %!cnum["av_end"]=4!
+          fout.puts AWK_INDENT + %!cnum["av_ref"]=5!
+          fout.puts AWK_INDENT + %!cnum["av_alt"]=6!
+          fout.puts AWK_INDENT + %!cnum["CHROM"]=7!
+          fout.puts AWK_INDENT + %!cnum["POS"]=8!
+          fout.puts AWK_INDENT + %!cnum["ID"]=9!
+          fout.puts AWK_INDENT + %!cnum["REF"]=10!
+          fout.puts AWK_INDENT + %!cnum["ALT"]=11!
+          fout.puts AWK_INDENT + %!cnum["QUAL"]=12!
+          fout.puts AWK_INDENT + %!cnum["FILTER"]=13!
+          fout.puts AWK_INDENT + %!cnum["INFO"]=14!
+          fout.puts AWK_INDENT + %!cnum["FORMAT"]=15!
+          fout.puts AWK_INDENT + %!cnum["sample"]=16!
           colcount = AV_HEADER.split("\t").size + 1
           config.annotations.select{|x|x.type.include?(type)}.each do |annot|
             case annot.mode
@@ -535,9 +551,9 @@ module AvSummary
             end
           end
           fout.puts "}"
-          fout.puts "{"
-          fout.puts AWK_INDENT + 'split($0,cols,"\t")'
-            fout.puts "}"
+          fout.puts "# main loop"
+          fout.puts "{ " + AWK_INDENT + 'split($0,cols,"\t") }' 
+          fout.puts '/^\#/ { next }'
         end # open
       end # types.each
     end # def

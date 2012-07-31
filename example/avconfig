@@ -37,7 +37,7 @@ annotation "EnsGene" do
   dbtype "ensgene"
 end
 
-annotation "GENCODE_basic_V7" do
+annotation "GENCODE_basicV7" do
   type :snv, :indel
   mode :geneanno
   dbtype "wgEncodeGencodeBasicV7"
