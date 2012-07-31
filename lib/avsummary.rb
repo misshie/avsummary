@@ -216,9 +216,9 @@ module AvSummary
         end
       end
       $stderr.puts
-      $stderr.puts "Done. Run '. run-convert2annovar.sh',"
-      $stderr.puts "run '. run-annotate-variation.sh', then"
-      $stderr.puts "run avsummary.rb with i (integrate) command"
+      $stderr.puts "Done. Next, run '. run-convert2annovar.sh',"
+      $stderr.puts "'. run-annotate-variation.sh', and then"
+      $stderr.puts "'ruby avsummary.rb integrate'."
       $stderr.puts
     end
 
@@ -552,7 +552,7 @@ module AvSummary
           end
           fout.puts "}"
           fout.puts "# main loop"
-          fout.puts "{ " + AWK_INDENT + 'split($0,cols,"\t") }' 
+          fout.puts "{ " + 'split($0,cols,"\t") }' 
           fout.puts '/^\#/ { next }'
         end # open
       end # types.each
