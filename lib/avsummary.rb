@@ -47,8 +47,8 @@ module AvSummary
       arg ? @snv_vcf = arg : @snv_vcf
     end
 
-    def snv_av(arg=nil)
-      arg ? @snv_av = arg : @snv_av
+    def snv_av
+      "#{snv_vcf}.av"
     end
 
     def indel_vcf(arg=nil)
@@ -56,7 +56,7 @@ module AvSummary
     end
 
     def indel_av(arg=nil)
-      arg ? @indel_av = arg : @indel_av
+      "#{indel_vcf}.av"
     end
 
     def annotate_variation(arg=nil)

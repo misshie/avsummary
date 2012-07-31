@@ -3,14 +3,12 @@
 source do
   buildver :hg19
   snv_vcf "snv500.vcf"
-  snv_av  "snv500.av"
   indel_vcf "indel500.vcf"
-  indel_av "indel500.av"
   convert2annovar "/opt/annovar-2012May25/convert2annovar.pl"
   annotate_variation "/opt/annovar-2012May25/annotate_variation.pl"
   database_dir "/opt/annovar-humandb"
 
-  ##  defaults settings
+  ##  default settings
   #  snv_dir "SNV"
   #  snv_summary "summary_snv.txt"
   #  snv_awk "filter-template-snv.awk"
