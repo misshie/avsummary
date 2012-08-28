@@ -11,6 +11,7 @@ module AvSummary
   AVCONFIG = "avconfig"
   AVCONVERT = "run-convert2annovar.sh"
   AVSCRIPT = "run-annotate-variartion.sh"
+  BATCHSIZE = "50m"
   CHR_ORDER =
     %w(M 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y) \
     .map{|e|"chr#{e}"}
@@ -163,6 +164,7 @@ module AvSummary
                    "--format vcf4",
                    "--includeinfo",
                    "--allallele",
+                   "--batchsize #{BATCHSIZE}",
                    config.source.snv_vcf,
                    "> #{config.source.snv_av}",
                    "2> #{config.source.snv_av}.log",
@@ -172,6 +174,7 @@ module AvSummary
                    "--format vcf4",
                    "--includeinfo",
                    "--allallele",
+                   "--batchsize #{BATCHSIZE}",
                    config.source.indel_vcf,
                    "> #{config.source.indel_av}",
                    "2> #{config.source.indel_av}.log",
