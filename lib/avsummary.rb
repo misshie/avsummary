@@ -553,7 +553,7 @@ module AvSummary
           fout.puts "}"
           fout.puts "# main loop"
           fout.puts "{ " + 'split($0,cols,"\t") }' 
-          fout.puts '/^\#/ { next }'
+          fout.puts '/^\#/ { print; next }'
         end # open
       end # types.each
     end # def
