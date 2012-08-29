@@ -77,12 +77,6 @@ annotation "dbSNP135NonFlagged" do
   dbtype :snp135NonFlagged
 end
 
-annotation "dbSNP135Common" do
-  type :snv, :indel
-  mode :filter
-  dbtype :snp135Common
-end
-
 annotation "CG69" do
   type :snv, :indel
   mode :filter

@@ -5,3 +5,5 @@ SNV/*
 *.sh
 *.txt
 *.awk
+!filter-indel-standard.awk
+!filter-snv-standard.awk
