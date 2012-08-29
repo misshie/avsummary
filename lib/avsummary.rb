@@ -5,7 +5,7 @@ require 'kyotocabinet'
 require 'striuct'
 require 'pp'
 
-VERSION = "20120731"
+VERSION = "20120829"
 
 module AvSummary
   AVCONFIG = "avconfig"
@@ -164,7 +164,6 @@ module AvSummary
                    "--format vcf4",
                    "--includeinfo",
                    "--allallele",
-                   "--batchsize #{BATCHSIZE}",
                    config.source.snv_vcf,
                    "> #{config.source.snv_av}",
                    "2> #{config.source.snv_av}.log",
@@ -174,7 +173,6 @@ module AvSummary
                    "--format vcf4",
                    "--includeinfo",
                    "--allallele",
-                   "--batchsize #{BATCHSIZE}",
                    config.source.indel_vcf,
                    "> #{config.source.indel_av}",
                    "2> #{config.source.indel_av}.log",
@@ -194,6 +192,7 @@ module AvSummary
                        "--#{annot.mode}",
                        "--buildver #{config.source.buildver}",
                        "--dbtype #{annot.dbtype}",
+                       "--batchsize #{BATCHSIZE}",
                        "#{annot.avopt}",
                        "#{config.source.snv_av}",
                        "${db}",
@@ -210,6 +209,7 @@ module AvSummary
                        "--#{annot.mode}",
                        "--buildver #{config.source.buildver}",
                        "--dbtype #{annot.dbtype}",
+                       "--batchsize #{BATCHSIZE}",
                        "#{annot.avopt}",
                        "#{config.source.indel_av}",
                        "${db}",
