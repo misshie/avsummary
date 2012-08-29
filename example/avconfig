@@ -4,8 +4,8 @@ source do
   buildver :hg19
   snv_vcf "snv500.vcf"
   indel_vcf "indel500.vcf"
-  convert2annovar "/opt/annovar-2012May25/convert2annovar.pl"
-  annotate_variation "/opt/annovar-2012May25/annotate_variation.pl"
+  convert2annovar "/opt/annovar/convert2annovar.pl"
+  annotate_variation "/opt/annovar/annotate_variation.pl"
   database_dir "/opt/annovar-humandb"
 
   ##  default settings
@@ -71,11 +71,17 @@ annotation "dbSNP135" do
   dbtype "snp135"
 end
 
-# annotation "dbSNP135NonFlagged" do
-#    type :snv, :indel
-#    mode :filter
-#   dbtype :snp135NonFlagged
-# end
+annotation "dbSNP135NonFlagged" do
+  type :snv, :indel
+  mode :filter
+  dbtype :snp135NonFlagged
+end
+
+annotation "dbSNP135Common" do
+  type :snv, :indel
+  mode :filter
+  dbtype :snp135Common
+end
 
 annotation "CG69" do
   type :snv, :indel
@@ -97,9 +103,3 @@ annotation "1000g2012Feb_all" do
   dbtype "1000g2012feb_all"
 end
 
-annotation "SpliceGENCODEv12" do
-  type :snv, :indel
-  mode :regionanno
-  dbtype "gff3"
-  avopt "--gff3dbfile hg19_splice-affecting-GENCODEv12.sort.uniq.gff3"
-end
