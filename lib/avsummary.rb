@@ -5,7 +5,8 @@ require 'kyotocabinet'
 require 'striuct'
 require 'pp'
 
-VERSION = "20120829"
+#VERSION = "20120829"
+VERSION = "20120920"
 
 module AvSummary
   AVCONFIG = "avconfig"
@@ -466,12 +467,12 @@ module AvSummary
       end
  
       types.each do |type|
-        open(wfile[type], "w") do |fsnv|
-          fsnv.puts "#{AV_HEADER}\t#{build_info_header(type)}"
+        open(wfile[type], "w") do |fsummary|
+          fsummary.puts "#{AV_HEADER}\t#{build_info_header(type)}"
           sorted_vcf_keys(type).each do |key|
             values = Array.new
             values << key
-            values << av_dbs[type][key]
+            values << av_dbs[type][key].sub(/\t\z/, "")
             config.annotations.each do |annot|
               case annot.mode.downcase
               when :regionanno, :filter
@@ -498,7 +499,7 @@ module AvSummary
                 raise "this should not happen"
               end
             end
-            fsnv.puts values.join("\t")
+            fsummary.puts values.join("\t")
           end
         end
       end
