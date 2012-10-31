@@ -6,7 +6,8 @@ require 'striuct'
 require 'pp'
 
 #VERSION = "20120829"
-VERSION = "20120920b"
+#VERSION = "20120920b"
+VERSION = "20121101"
 
 module AvSummary
   AVCONFIG = "avconfig"
@@ -154,6 +155,12 @@ module AvSummary
 
   class Application < Thor
     include AvSummary
+
+    desc 'version', 'print version and license'
+    def version
+      puts "version #{VERSION}"
+      puts "copyright (c) MISHIMA, Hiroyuki under the MIT license"
+    end
 
     desc 'annotate', 'generate a annotate_variation script'
     def annotate
@@ -449,7 +456,9 @@ module AvSummary
         keys = Array.new
         av_dbs[type].each_key{|k|keys << k.first}
         @sorted_vcf_keys[type] = keys.sort_by do |k|
-          chr, st, ed, ref, alt = k.split(/:|-|;|>/)
+          position, variation = k.split(';')
+          chr, st, ed = position.split(/:|-/)
+          ref, alt = variation.split('>')
           [CHR_ORDER.index(chr), Integer(st), Integer(ed), ref, alt]
         end
       end
