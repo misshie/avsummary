@@ -6,7 +6,7 @@ require 'striuct'
 require 'pp'
 
 #VERSION = "20120829"
-VERSION = "20120920"
+VERSION = "20120920b"
 
 module AvSummary
   AVCONFIG = "avconfig"
@@ -368,8 +368,9 @@ module AvSummary
             key = "#{cols[2]}:#{cols[3]}-#{cols[4]};#{cols[5]}>#{cols[6]}"
             value = cols[1]
             if db[type][key]
-              raise "duplicated key in '#{annot.name}/#{type}' is found!"
-              #db[type][key] = "#{db[key]}\n#{value}"
+              $stderr.puts "overwrote duplicated key '#{key}' in '#{annot.name}/#{type}' is found!"
+              db[type][key] = value 
+             #db[type][key] = "#{db[key]}\n#{value}"
             else
               db[type][key] = value
             end
@@ -388,8 +389,9 @@ module AvSummary
               value = "#{cols[1]}\t#{cols[2]}"
             end
              if db[type][key]
-               raise "duplicated key in '#{annot.name}/#{type}' is found!"
+               $stderr.puts "overwrote duplicated key '#{key}' in '#{annot.name}/#{type}' is found!"
                #db[type][key] = "#{db[key]}\n#{value}"
+               db[type][key] = value
              else
                db[type][key] = value
              end
