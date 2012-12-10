@@ -1,0 +1,92 @@
+# -*- coding: utf-8; mode: ruby; -*-
+
+source do
+  buildver :hg19
+  snv_vcf "sample.snv.filtered.vcf"
+  indel_vcf "sample.indel.filtered.left.vcf"
+  convert2annovar "/opt/annovar/convert2annovar.pl"
+  annotate_variation "/opt/annovar/annotate_variation.pl"
+  database_dir "/opt/annovar-humandb"
+
+  ##  default settings
+  #  snv_dir "SNV"
+  #  snv_summary "summary_snv.txt"
+  #  snv_awk "filter-template-snv.awk"
+  #  indel_dir "INDEL"
+  #  indel_summary "summary_indel.txt"
+  #  indel_awk "filter-template-indel.awk"
+end
+
+annotation "CytoBand" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype "cytoband"
+end
+
+annotation "RefGene" do
+  type :snv, :indel
+  mode :geneanno
+  dbtype "refgene"
+end
+
+annotation "EnsGene" do
+  type :snv, :indel
+  mode :geneanno
+  dbtype "ensgene"
+end
+
+annotation "GENCODE_basicV12" do
+  type :snv, :indel
+  mode :geneanno
+  dbtype "wgEncodeGencodeBasicV12"
+end
+
+annotation "miRNA" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype "mirna"
+end
+
+annotation "miRNAtarget" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype "mirnatarget"
+end
+
+annotation "SegDup" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype "segdup"
+end
+
+annotation "DGV" do
+  type :snv, :indel
+  mode :regionanno
+  dbtype "dgv"
+end
+
+annotation "dbSNP135" do
+   type :snv, :indel
+   mode :filter
+  dbtype "snp135"
+end
+
+annotation "CG69" do
+  type :snv, :indel
+  mode :filter
+  dbtype "generic"
+  avopt "--genericdbfile hg19_cg69.txt"
+end
+
+annotation "ESP6500si_all" do
+  type :snv, :indel
+  mode :filter
+  dbtype "generic"
+  avopt "--genericdbfile hg19_esp6500si_all.txt"
+end
+
+annotation "1000g2012Apr_all" do
+  type :snv, :indel
+  mode :filter
+  dbtype "1000g2012apr_all"
+end

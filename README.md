@@ -1,18 +1,18 @@
 #AvSummary
 ##Introduction
-GATK & ANNOVAR workflow tool 
+GATK & ANNOVAR workflow tools 
 
-##Contributing to avsummary
- 
-* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
-* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
-* Fork the project.
-* Start a feature/bugfix branch.
-* Commit and push until you are happy with your contribution.
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+## avsummary.rb
+At first, accoding to the 'avconfig' file using Ruby DSL, 'ruby avsummary.rb annotate' generates two shell script files: a shell script to convert one-sample-per-file vcf files for SNVs and INDELs to ANNOVAR's input file (avsummary annotate) and a shellscript to run annotate-variation.pl. After runnning these shell scripts, execute 'ruby avsummary.rb integrate' and get an integrated table. You can filter the intehrated table using awk scripts. 
 
-##Copyright
+## vcf-gtselect.rb & vcf-locusselect.rb
+If locus-based (physical position-based) set intersection or subtraction is necessary, please try GATK's ConvertAnnotation and run vcf-gtselect.rb to select locus. Locus-wise statistics (such as QUAL) can be restore using vcf-locusselect.rb
+
+## genewise.rb
+Using gene-prediction annotation (such as GENCODEv12), gene-wise summarization and sample superimposition can be performed using genewise.rb
+
+##Warning
+I am sorry for poor documentation. Feel free to contact me to ask how to use.
 
 Copyright (c) 2012 Hiroyuki Mishima. See LICENSE.txt for
 further details.
